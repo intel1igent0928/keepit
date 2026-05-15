@@ -2,7 +2,11 @@ const { useState, useEffect, useRef } = React;
 const tg = window.Telegram?.WebApp;
 const haptic = (t='light') => tg?.HapticFeedback?.impactOccurred?.(t);
 const notify  = (t='success') => tg?.HapticFeedback?.notificationOccurred?.(t);
-const save = (k,v) => localStorage.setItem('ki_'+k, JSON.stringify(v));
+const save = (k,v) => { 
+  const str = JSON.stringify(v);
+  localStorage.setItem('ki_'+k, str); 
+  try { if(tg?.CloudStorage) tg.CloudStorage.setItem('ki_'+k, str); } catch(e){}
+};
 const load = (k,d) => { try { const r=localStorage.getItem('ki_'+k); return r?JSON.parse(r):d; } catch{return d;} };
 
 const CURRENCIES = ['UZS','KGS','USD','EUR','RUB','KZT'];
@@ -1163,11 +1167,49 @@ function HistoryPage({data,setData}){
 }
 
 function App(){
+  const [isReady, setIsReady]=useState(false);
   const [onboarded,setOnboarded]=useState(()=>load('onboarded',false));
   const [tab,setTab]=useState('home');
   const [data,setDataRaw]=useState(()=>({...DEFAULT_DATA,...load('data',{})}));
   const setData=upd=>setDataRaw(prev=>{const next=typeof upd==='function'?upd(prev):{...prev,...upd};save('data',next);return next;});
-  useEffect(()=>{tg?.ready();tg?.expand();},[]);
+  
+  useEffect(()=>{
+    tg?.ready();tg?.expand();
+    if (tg?.CloudStorage) {
+      try {
+        tg.CloudStorage.getKeys((err, keys) => {
+          if (!err && keys && keys.includes('ki_data')) {
+            tg.CloudStorage.getItem('ki_data', (e, v) => {
+              if (!e && v) {
+                try {
+                  const cloudData = JSON.parse(v);
+                  setDataRaw(prev => ({...prev, ...cloudData}));
+                  localStorage.setItem('ki_data', v);
+                } catch(err){}
+              }
+              tg.CloudStorage.getItem('ki_onboarded', (e2, v2) => {
+                 if(!e2 && v2 === 'true') {
+                   setOnboarded(true);
+                   localStorage.setItem('ki_onboarded', 'true');
+                 }
+                 setIsReady(true);
+              });
+            });
+          } else {
+            const loc = localStorage.getItem('ki_data');
+            if (loc) {
+              try { tg.CloudStorage.setItem('ki_data', loc); } catch(e){}
+              try { tg.CloudStorage.setItem('ki_onboarded', localStorage.getItem('ki_onboarded')||'false'); } catch(e){}
+            }
+            setIsReady(true);
+          }
+        });
+      } catch(e) { setIsReady(true); }
+    } else {
+      setIsReady(true);
+    }
+  },[]);
+
   useEffect(()=>{document.documentElement.setAttribute('data-theme',data.theme||'light');},[data.theme]);
   const handleOnboard=(fields)=>{setData(d=>({...d,...fields}));save('onboarded',true);setOnboarded(true);};
   const t=T[data.lang||'ru'];
@@ -1179,6 +1221,7 @@ function App(){
     {id:'history',label:'История'},
     {id:'settings',label:t.settings},
   ];
+  if(!isReady) return <div style={{height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text2)',fontSize:14}}>Загрузка...</div>;
   return(<>
     {!onboarded&&<Onboarding onDone={handleOnboard}/>}
     {tab==='home'&&<Dashboard data={data} setData={setData}/>}
