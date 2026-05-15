@@ -126,16 +126,23 @@ function calcBalance(data) {
   const grossBalance=totalIncome-totalSpent; // without savings deduction
   const daysLeft=Math.max(1,total-d);
   let adjustedDaysLeft = daysLeft;
+  let totalPeriod = total;
   if (data.userType === 'worker' && data.salaryDay) {
     let nextSal = new Date(y, m, data.salaryDay);
     if (d >= data.salaryDay) nextSal = new Date(y, m + 1, data.salaryDay);
     const diff = Math.ceil((nextSal - now) / (1000*60*60*24));
     if (diff > 0) adjustedDaysLeft = diff;
+  } else if (data.userType === 'student' && data.pocketDays && data.pocketStartDate) {
+    const start = new Date(data.pocketStartDate);
+    const diff = Math.floor((now - start) / 86400000);
+    const left = data.pocketDays - diff;
+    adjustedDaysLeft = Math.max(1, left);
+    totalPeriod = data.pocketDays;
   }
   const dailyBudget=Math.max(0,balance/adjustedDaysLeft);
   const wdLeft=Math.max(1,countWorkdays(y,m,d+1,total)+1);
   const workdayBudget=cats.find(c=>c.type==='workday')?.dailyAmount||0;
-  return {totalSpent,balance,grossBalance,daysLeft:adjustedDaysLeft,dailyBudget,catSpent,bigSpent,fixedPaid,total,elapsed:d,catMonthly,fixedMonthly,extraIncome,totalIncome,baseSalary,wdElapsed,wdTotal,wdLeft,workdayBudget,monthlySav};
+  return {totalSpent,balance,grossBalance,daysLeft:adjustedDaysLeft,totalPeriod,dailyBudget,catSpent,bigSpent,fixedPaid,total,elapsed:d,catMonthly,fixedMonthly,extraIncome,totalIncome,baseSalary,wdElapsed,wdTotal,wdLeft,workdayBudget,monthlySav};
 }
 const logActivity=(data,entry)=>({...data,activityLog:[...(data.activityLog||[]),{...entry,id:Date.now(),date:new Date().toISOString()}]});
 
@@ -248,14 +255,15 @@ function Onboarding({onDone}){
   ];
   // Student steps
   const studentSteps=[
-    {emoji:'💵',title:'Карманные деньги',sub:'Сколько сейчас есть на руках? Родители дают деньги, ты сам добавляешь когда получаешь.',content:(
+    {emoji:'💵',title:'Карманные деньги',sub:'Сколько сейчас есть на руках и на сколько дней они рассчитаны?',content:(
       <div>
-        <div className="input-group" style={{display:'flex',gap:8}}>
+        <div className="input-group" style={{display:'flex',gap:8,marginBottom:12}}>
           <FormattedInput placeholder="500 000" value={d.pocketMoney} onChange={v=>upd('pocketMoney',v)} style={{flex:1}}/>
           <select className="glass-input" value={d.currency} onChange={e=>upd('currency',e.target.value)} style={{width:90}}>
             {CURRENCIES.map(c=><option key={c} style={{background:'var(--bg)'}}>{c}</option>)}
           </select>
         </div>
+        <input className="glass-input" type="number" placeholder="На сколько дней? (например: 7)" value={d.pocketDays||''} onChange={e=>upd('pocketDays',e.target.value)}/>
         <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>Когда дадут ещё — добавишь в приложении ✓</div>
       </div>
     )},
@@ -282,7 +290,7 @@ function Onboarding({onDone}){
     if(userType==='worker'){
       onDone({userType:'worker',lang:d.lang||'ru',theme:d.theme||'light',salary:parseFloat(d.salary)||4000000,currency:d.currency,salaryDay:parseInt(d.salaryDay)||25,monthlySavings:parseFloat(d.monthlySavings)||0,savingsBalance:parseFloat(d.savings)||0,categories:[]});
     } else {
-      onDone({userType:'student',lang:d.lang||'ru',theme:d.theme||'light',pocketMoney:parseFloat(d.pocketMoney)||0,salary:0,currency:d.currency,salaryDay:0,monthlySavings:0,savingsBalance:parseFloat(d.savings)||0,categories:[]});
+      onDone({userType:'student',lang:d.lang||'ru',theme:d.theme||'light',pocketMoney:parseFloat(d.pocketMoney)||0,pocketDays:parseInt(d.pocketDays)||7,pocketStartDate:new Date().toISOString(),salary:0,currency:d.currency,salaryDay:0,monthlySavings:0,savingsBalance:parseFloat(d.savings)||0,categories:[]});
     }
   };
   const next=()=>{ haptic('medium'); if(step<steps.length-1){setStep(s=>s+1);}else{finish();} };
@@ -306,7 +314,7 @@ function Dashboard({data,setData}){
   const [sheet,setSheet]=useState(null);
   const [incomeSheet,setIncomeSheet]=useState(false);
   const [chip,setChip]=useState(null);
-  const {balance,grossBalance,monthlySav,daysLeft,dailyBudget,catSpent,elapsed,total,catMonthly,fixedMonthly,fixedPaid,extraIncome,totalIncome,baseSalary,wdElapsed,wdTotal,wdLeft,workdayBudget}=calcBalance(data);
+  const {balance,grossBalance,monthlySav,daysLeft,totalPeriod,dailyBudget,catSpent,elapsed,total,catMonthly,fixedMonthly,fixedPaid,extraIncome,totalIncome,baseSalary,wdElapsed,wdTotal,wdLeft,workdayBudget}=calcBalance(data);
   const now=todayDate();
   
   const closestEvents = [...(data.events||[])].filter(e=>new Date(e.date)>=new Date(now.toDateString())).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,3);
@@ -397,7 +405,11 @@ function Dashboard({data,setData}){
         <div style={{flex:1}}>
           <div className="dc-label">{data.lang==='en'?'You can spend today':'Сегодня можно потратить'}</div>
           <div className="dc-amount">{fmt(dailyBudget,data.currency)}</div>
-          <div className="dc-days">{daysLeft} {data.lang==='en'?'days left of':' дн. из'} {total}</div>
+          <div className="dc-days">
+            {data.userType==='worker'
+              ? `${daysLeft} ${data.lang==='en'?'days until salary':'дн. до зарплаты'}`
+              : `${daysLeft} ${data.lang==='en'?'days left of':'дн. из'} ${totalPeriod}`}
+          </div>
         </div>
       </div>
       {cmpPct!==null&&(
