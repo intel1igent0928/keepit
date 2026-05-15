@@ -1042,8 +1042,14 @@ function SettingsPage({data,setData}){
           </div>
         </div>
         <div className="settings-row">
-          <button className="btn-sm" style={{width:'100%',background:'var(--accent-soft)',color:'var(--accent)',borderColor:'var(--accent)'}} onClick={()=>{
+          <button className="btn-sm" style={{width:'100%',background:'var(--accent-soft)',color:'var(--accent)',borderColor:'var(--accent)'}} onClick={async ()=>{
             haptic('medium');
+            const uid = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            if (!uid) {
+              alert('Не удалось получить ваш Telegram ID. Откройте приложение внутри Telegram.');
+              return;
+            }
+            
             const msgs = [
               '🤖 Кожаный мешок, я работаю! Твои деньги под моим присмотром.',
               '💸 Тест пройден! Я слежу за каждой твоей копейкой 👀',
@@ -1052,11 +1058,20 @@ function SettingsPage({data,setData}){
               '🔔 Дзинь-дзинь! Копилка на связи, всё работает отлично!'
             ];
             const randomMsg = msgs[Math.floor(Math.random()*msgs.length)];
+            
             try {
-              if (window.Telegram?.WebApp?.sendData) {
-                window.Telegram.WebApp.sendData(JSON.stringify({action: 'notify', text: randomMsg}));
+              const res = await fetch('https://api.telegram.org/bot8840068719:AAHYTcpw6tCS72_h0UPuu50wh17nJszhjjU/sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: uid,
+                  text: randomMsg
+                })
+              });
+              if(res.ok) {
+                // success
               } else {
-                alert('Функция отправки данных не поддерживается в этом режиме Telegram. Откройте приложение через кнопку меню бота.');
+                alert('Не удалось отправить сообщение. Вы уже запустили бота /start?');
               }
             } catch(e) {
               alert('Ошибка при отправке: ' + e.message);
