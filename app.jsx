@@ -127,10 +127,17 @@ function calcBalance(data) {
   const balance=totalIncome-totalSpent-monthlySav;
   const grossBalance=totalIncome-totalSpent; // without savings deduction
   const daysLeft=Math.max(1,total-d);
-  const dailyBudget=Math.max(0,balance/daysLeft);
+  let adjustedDaysLeft = daysLeft;
+  if (data.userType === 'worker' && data.salaryDay) {
+    let nextSal = new Date(y, m, data.salaryDay);
+    if (d >= data.salaryDay) nextSal = new Date(y, m + 1, data.salaryDay);
+    const diff = Math.ceil((nextSal - now) / (1000*60*60*24));
+    if (diff > 0) adjustedDaysLeft = diff;
+  }
+  const dailyBudget=Math.max(0,balance/adjustedDaysLeft);
   const wdLeft=Math.max(1,countWorkdays(y,m,d+1,total)+1);
   const workdayBudget=cats.find(c=>c.type==='workday')?.dailyAmount||0;
-  return {totalSpent,balance,grossBalance,daysLeft,dailyBudget,catSpent,bigSpent,fixedPaid,total,elapsed:d,catMonthly,fixedMonthly,extraIncome,totalIncome,baseSalary,wdElapsed,wdTotal,wdLeft,workdayBudget,monthlySav};
+  return {totalSpent,balance,grossBalance,daysLeft:adjustedDaysLeft,dailyBudget,catSpent,bigSpent,fixedPaid,total,elapsed:d,catMonthly,fixedMonthly,extraIncome,totalIncome,baseSalary,wdElapsed,wdTotal,wdLeft,workdayBudget,monthlySav};
 }
 const logActivity=(data,entry)=>({...data,activityLog:[...(data.activityLog||[]),{...entry,id:Date.now(),date:new Date().toISOString()}]});
 
@@ -153,7 +160,7 @@ function NumPadSheet({title,currency,onClose,onConfirm,showSavings,showName,lang
   const [name,setName]=useState('');
   const [fromSav,setFromSav]=useState(false);
   const press=k=>{ haptic('light'); setVal(p=>{ if(k==='⌫') return p.length>1?p.slice(0,-1):'0'; if(k==='.'&&p.includes('.')) return p; if(p==='0'&&k!=='.') return k; return p+k; }); };
-  const confirm=()=>{ const n=parseFloat(val); if(!n) return; notify('success'); onConfirm(n,{fromSavings:fromSav,name:name||title}); };
+  const confirm=()=>{ const n=parseFloat(val); if(!n) return; notify('success'); onConfirm(n,{fromSavings:fromSav,name:name||''}); };
   return(<>
     <div className="sheet-backdrop fade-in" onClick={onClose}/>
     <div className="bottom-sheet slide-up">
@@ -275,9 +282,9 @@ function Onboarding({onDone}){
   const finish=()=>{
     haptic('heavy');
     if(userType==='worker'){
-      onDone({userType:'worker',salary:parseFloat(d.salary)||4000000,currency:d.currency,salaryDay:parseInt(d.salaryDay)||25,monthlySavings:parseFloat(d.monthlySavings)||0,savingsBalance:parseFloat(d.savings)||0,categories:[{id:'daily',name:'Обед + транспорт',icon:'🍽️',type:'workday',dailyAmount:parseFloat(d.dailyAmount)||50000,daysPerWeek:5,color:'#c0392b'}]});
+      onDone({userType:'worker',lang:d.lang||'ru',theme:d.theme||'light',salary:parseFloat(d.salary)||4000000,currency:d.currency,salaryDay:parseInt(d.salaryDay)||25,monthlySavings:parseFloat(d.monthlySavings)||0,savingsBalance:parseFloat(d.savings)||0,categories:[]});
     } else {
-      onDone({userType:'student',pocketMoney:parseFloat(d.pocketMoney)||0,salary:0,currency:d.currency,salaryDay:0,monthlySavings:0,savingsBalance:parseFloat(d.savings)||0,categories:[{id:'daily',name:'Обед + транспорт',icon:'🍽️',type:'workday',dailyAmount:parseFloat(d.dailyAmount)||30000,daysPerWeek:5,color:'#c0392b'}]});
+      onDone({userType:'student',lang:d.lang||'ru',theme:d.theme||'light',pocketMoney:parseFloat(d.pocketMoney)||0,salary:0,currency:d.currency,salaryDay:0,monthlySavings:0,savingsBalance:parseFloat(d.savings)||0,categories:[]});
     }
   };
   const next=()=>{ haptic('medium'); if(step<steps.length-1){setStep(s=>s+1);}else{finish();} };
@@ -337,7 +344,7 @@ function Dashboard({data,setData}){
   const lastSpent=data.lastMonthSpent||0;
   const cmpPct=lastSpent>0?Math.round((thisSpent-lastSpent)/lastSpent*100):null;
   const addBig=(amount,extras)=>{
-    const exp={id:Date.now(),name:extras.name||t.bigExpenseTitle,icon:'💸',amount,date:now.toISOString(),fromSavings:extras.fromSavings||false};
+    const exp={id:Date.now(),name:extras.name||(data.lang==='en'?'Large Expense':'Крупный расход'),icon:'💸',amount,date:now.toISOString(),fromSavings:extras.fromSavings||false};
     setData(d=>{
       const next={...d,bigExpenses:[...(d.bigExpenses||[]),exp]};
       if(extras.fromSavings){next.savingsBalance=Math.max(0,(d.savingsBalance||0)-amount);next.savingsHistory=[...(d.savingsHistory||[]),{id:Date.now(),date:now.toISOString(),type:'withdraw',amount,note:extras.name||'Крупный расход'}];}
@@ -347,7 +354,7 @@ function Dashboard({data,setData}){
   };
   const addIncome=(amount,extras)=>{
     haptic('medium');notify('success');
-    const entry={id:Date.now(),amount,note:extras?.name||'\u0414\u043e\u043f. \u0434\u043e\u0445\u043e\u0434',date:now.toISOString()};
+    const entry={id:Date.now(),amount,note:extras?.name||(data.lang==='en'?'Extra Income':'Доп. доход'),date:now.toISOString()};
     setData(d=>{
       const next={...d,incomeEntries:[...(d.incomeEntries||[]),entry]};
       if(d.userType==='student') next.pocketMoney=(d.pocketMoney||0)+amount;
@@ -653,8 +660,8 @@ function SavingsPage({data,setData}){
         <div className="sav-label">{t.saved}</div>
         <div className="sav-amount">{fmt(data.savingsBalance||0,data.currency)}</div>
         <div style={{display:'flex',gap:10,marginTop:16}}>
-          <button className="btn-sm" style={{background:'rgba(255,255,255,0.2)',color:'#fff',flex:1,padding:'10px',border:'1px solid rgba(255,255,255,0.3)'}} onClick={()=>setAddSheet(true)}>+ {t.deposit}</button>
-          <button className="btn-sm" style={{background:'rgba(255,255,255,0.2)',color:'#fff',flex:1,padding:'10px',border:'1px solid rgba(255,255,255,0.3)'}} onClick={()=>setWdSheet(true)}>− {t.withdraw}</button>
+          <button className="btn-sm" style={{background:'rgba(255,255,255,0.2)',color:'#fff',flex:1,padding:'10px',border:'1px solid rgba(255,255,255,0.3)'}} onClick={()=>setAddSheet(true)}>{t.deposit}</button>
+          <button className="btn-sm" style={{background:'rgba(255,255,255,0.2)',color:'#fff',flex:1,padding:'10px',border:'1px solid rgba(255,255,255,0.3)'}} onClick={()=>setWdSheet(true)}>{t.withdraw}</button>
         </div>
       </div>
       {(data.savingsHistory||[]).length>0&&<>
@@ -1061,7 +1068,10 @@ function HistoryPage({data,setData}){
   });
   // Savings history this month
   (data.savingsHistory||[]).filter(h=>{const hd=new Date(h.date);return hd.getMonth()===m&&hd.getFullYear()===y;}).forEach(h=>{
-    items.push({id:'sh_'+h.id,icon:h.type==='deposit'?'📥':'📤',name:h.note||'Накопления',sub:'Копилка',amount:h.type==='deposit'?h.amount:-h.amount,color:h.type==='deposit'?'#2d7d46':'#c0392b',date:h.date});
+    const isDup = (data.bigExpenses||[]).some(b => b.fromSavings && b.date === h.date);
+    if (!isDup) {
+      items.push({id:'sh_'+h.id,icon:h.type==='deposit'?'📥':'📤',name:h.note||'Накопления',sub:'Копилка',amount:h.type==='deposit'?-h.amount:h.amount,color:h.type==='deposit'?'#2d7d46':'#c0392b',date:h.date});
+    }
   });
   // Debts this month
   (data.debts||[]).filter(d=>{const dd=new Date(d.createdAt);return dd.getMonth()===m&&dd.getFullYear()===y;}).forEach(d=>{
@@ -1069,9 +1079,11 @@ function HistoryPage({data,setData}){
   });
   // Activity log
   (data.activityLog||[]).filter(a=>{const ad=new Date(a.date);return ad.getMonth()===m&&ad.getFullYear()===y;}).forEach(a=>{
-    if(!items.find(i=>i.id==='act_'+a.id)) {
-      const isInc = a.type === 'income' || (a.type === 'debt_paid' && a.label.includes('получили'));
-      items.push({id:'act_'+a.id,icon:'📋',name:a.label,sub:'Операция',amount:a.amount ? (isInc ? a.amount : -a.amount) : 0,color:a.color||'#6e6a65',date:a.date});
+    if (a.type !== 'expense') {
+      if(!items.find(i=>i.id==='act_'+a.id)) {
+        const isInc = a.type === 'income' || (a.type === 'debt_paid' && a.label.includes('получили'));
+        items.push({id:'act_'+a.id,icon:'📋',name:a.label,sub:'Операция',amount:a.amount ? (isInc ? a.amount : -a.amount) : 0,color:a.color||'#6e6a65',date:a.date});
+      }
     }
   });
 

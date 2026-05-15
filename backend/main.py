@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
-ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "") # Chat/group ID to receive feedback
+ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "-5108588026") # Chat/group ID to receive feedback
 
 app = FastAPI(title="KeepIt Notification Service", version="1.0.0")
 
