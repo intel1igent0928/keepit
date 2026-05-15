@@ -29,6 +29,11 @@ class NotifyRequest(BaseModel):
     text: str
     parse_mode: str = "HTML"
 
+class FeedbackRequest(BaseModel):
+    user_name: str
+    user_id: int
+    text: str
+
 
 class ScheduledNotify(BaseModel):
     tg_user_id: int
@@ -114,6 +119,17 @@ async def event_reminder(req: ScheduledNotify):
         + "\n\nОткройте KeepIt → История для деталей."
     )
     return await send_notification(NotifyRequest(tg_user_id=req.tg_user_id, text=text))
+
+@app.post("/api/feedback")
+async def api_feedback(req: FeedbackRequest):
+    """Receive feedback directly via POST request from Mini App."""
+    if not ADMIN_CHAT_ID:
+        return {"ok": False, "error": "Admin chat ID not set"}
+    
+    user_info = f"@{req.user_name}" if req.user_name != "Аноним" else f"ID: {req.user_id}"
+    msg = f"💡 <b>Новая идея/жалоба!</b>\n\nОт: {user_info}\nТекст: {req.text}"
+    res = await send_notification(NotifyRequest(tg_user_id=int(ADMIN_CHAT_ID), text=msg))
+    return {"ok": True, "result": res}
 
 @app.post("/webhook")
 async def telegram_webhook(req: Request):

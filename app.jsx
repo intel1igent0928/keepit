@@ -15,9 +15,16 @@ const LANGS = { ru:'Русский', en:'English' };
 const daysInMonth = (y,m) => new Date(y,m+1,0).getDate();
 const todayDate = () => new Date();
 const monthKey = () => { const d=new Date(); return `${d.getFullYear()}-${d.getMonth()}`; };
-const fmt = (n, cur='UZS') => { if(!n && n!==0) return '—'; return new Intl.NumberFormat('ru-RU').format(Math.round(n))+' '+cur; };
-const fmtShort = n => { if(n>=1000000) return (n/1000000).toFixed(1)+'М'; if(n>=1000) return Math.round(n/1000)+'К'; return Math.round(n).toString(); };
-const fmtDate = iso => { const d=new Date(iso); return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit'}); };
+const fmt = (n, cur='UZS', lang='ru') => { if(!n && n!==0) return '—'; return new Intl.NumberFormat(lang==='en'?'en-US':'ru-RU').format(Math.round(n))+' '+cur; };
+const fmtShort = (n, cur='', lang='ru') => {
+  let val = n;
+  let suffix = '';
+  if(n>=1000000) { val = n/1000000; suffix = 'M'; }
+  else if(n>=1000) { val = n/1000; suffix = 'K'; }
+  const f = new Intl.NumberFormat(lang==='en'?'en-US':'ru-RU', {maximumFractionDigits:val>=1000?0:1}).format(val);
+  return f + suffix + (cur ? ' '+cur : '');
+};
+const fmtDate = (iso, lang='ru') => { const d=new Date(iso); return d.toLocaleDateString(lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit'}); };
 const countWorkdays=(y,m,from,to)=>{let c=0;for(let d=from;d<=to;d++){const w=new Date(y,m,d).getDay();if(w!==0&&w!==6)c++;}return c;};
 const workdaysInMonth=(y,m)=>countWorkdays(y,m,1,new Date(y,m+1,0).getDate());
 
@@ -45,7 +52,7 @@ const T = {
        workerBtn:'💼 Я работаю — есть зарплата', studentBtn:'🎓 Я студент / получаю от родителей',
        yourSalary:'Твоя зарплата', yourSalarySub:'Сколько получаешь и в какой день месяца?',
        salaryDayPlace:'День выплаты (напр. 25)', dailyBudget:'Дневной бюджет', dailyBudgetSub:'Ты работаешь 5 дней в неделю. Сколько в день на обед + транспорт?',
-       saveAuto:'Авто-накопление', saveAutoSub:'Остаток от зарплаты вычесть в копилку автоматически при получении?',
+       saveAuto:'Авто-накопление', saveAutoSub:'Остаток от зарплаты вычесть в копилку автоматически при получании?',
        saveTarget:'Цель накопления', saveTargetSub:'Если уже есть сбережения — введи сумму. (Можно 0)',
        pocketMoney:'Карманные деньги', pocketMoneySub:'Сколько сейчас есть на руках и на сколько дней они рассчитаны?',
        pocketDays:'На сколько дней? (например: 7)', pocketAddLater:'Когда дадут ещё — добавишь в приложении ✓',
@@ -54,7 +61,27 @@ const T = {
        salaryConfirmed:'✅ Да, поступила!', salaryNotYet:'⏰ Ещё нет', salaryOfDate:'Зарплата',
        youCanSpend:'Сегодня можно потратить', daysLeftOf:'дн. из', daysUntilSalary:'дн. до зарплаты',
        vsLastMonth:'Сравнение с прошлым месяцем', largeExpenses:'Крупные расходы', noLargeExpenses:'Нет крупных трат в этом месяце',
-       extraIncomeBtn:'➕ Доп. доход', studentExtraBtn:'➕ Родители дали деньги / Доп. доход'
+       extraIncomeBtn:'➕ Доп. доход', studentExtraBtn:'➕ Родители дали деньги / Доп. доход',
+       mo:'мес', extra:'доп.', daysLeft:'дн. осталось', spentLower:'потрачено',
+       salaryConfirmedLog:'Зарплата получена', autoSavingsLog:'Авто-накопления с зарплаты',
+       largeExpenseDefault:'Крупный расход', extraIncomeDefault:'Доп. доход',
+       perDay:'/ день', perMonth:'в месяц', workDays:'раб. дня', dailyBudgetHint:'💡 Это включает еду и транспорт вместе',
+       immediately:'Сразу', partMonth:'По частям', immediatelyMonth:'Сразу за месяц', limitMonth:'Лимит в месяц',
+       billingDay:'День списания (1-31)', total:'Итого:', due:'До', paid:'Оплачено', unpaid:'Не оплачено',
+       delete:'Удалить', contractTitlePlace:'Контракт универа…', contractTotalPlace:'Общая сумма',
+       contractInstallments:'Взносы (% + срок оплаты)', addInstallment:'+ Добавить взнос',
+       savingsHistoryDeposit:'Пополнение', savingsHistoryWithdraw:'Расход',
+       goalNamePlace:'iPhone 16, Машина…', optional:'(необяз.)', saveGoalBtn:'Отложить',
+       howMuchToSave:'Сколько отложить?', inDays:'Через {n} дн.', ago:'{n} дн. назад',
+       tomorrow:'Завтра', days:'дн.', resetConfirm:'Сбросить все данные?', feedbackSuccess:'Спасибо за ваш отзыв! Мы обязательно его рассмотрим.',
+       loading:'Загрузка...', morning:'Доброе утро', afternoon:'Добрый день', evening:'Добрый вечер',
+       debtOweLog:'Долг: ', debtLentLog:'Дал в долг: ', debtClosedLog:'Долг закрыт: ',
+       debtReturnedLog:'вернули', debtReceivedLog:'получили', debtPaidAlready:'Уже выплачено:', debtReturnedAlready:'Уже вернули:',
+       partially:'Частично', closed:'Закрытые', historyOp:'Операция', salaryLog:'Зарплата',
+       autoExpenseAccum:'Авто-расход (накоплено)', subscription:'Подписки', fromSavings:'Из накоплений',
+       savings:'Накопления', oweMe:'Мне должны', oweTo:'Я должен', extraIncome:'Доп. доход',
+       savingsBalance:'Сумма накоплений', autoSavingsMo:'Авто-накопления / мес', paydaySett:'День зарплаты (1-31)',
+       auto:'Авто'
      },
   en:{ home:'Home', budget:'Budget', savings:'Savings', events:'Events', settings:'Settings',
        salary:'Salary', payday:'Pay Day', autoExpenses:'Auto Expenses', subscriptions:'Subscriptions',
@@ -88,7 +115,27 @@ const T = {
        salaryConfirmed:'✅ Yes, received!', salaryNotYet:'⏰ Not yet', salaryOfDate:'Salary',
        youCanSpend:'You can spend today', daysLeftOf:'days left of', daysUntilSalary:'days until salary',
        vsLastMonth:'vs last month', largeExpenses:'Large Expenses', noLargeExpenses:'No large expenses this month',
-       extraIncomeBtn:'➕ Extra Income', studentExtraBtn:'➕ Parents gave money / Extra income'
+       extraIncomeBtn:'➕ Extra Income', studentExtraBtn:'➕ Parents gave money / Extra income',
+       mo:'mo', extra:'extra', daysLeft:'days left', spentLower:'spent',
+       salaryConfirmedLog:'Salary received', autoSavingsLog:'Auto-savings from salary',
+       largeExpenseDefault:'Large Expense', extraIncomeDefault:'Extra Income',
+       perDay:'/ day', perMonth:'per month', workDays:'work days', dailyBudgetHint:'💡 This includes food and transport together',
+       immediately:'Immediately', partMonth:'In parts', immediatelyMonth:'Entire month', limitMonth:'Monthly limit',
+       billingDay:'Billing day (1-31)', total:'Total:', due:'Due', paid:'Paid', unpaid:'Unpaid',
+       delete:'Delete', contractTitlePlace:'University contract...', contractTotalPlace:'Total amount',
+       contractInstallments:'Installments (% + due date)', addInstallment:'+ Add installment',
+       savingsHistoryDeposit:'Deposit', savingsHistoryWithdraw:'Withdrawal',
+       goalNamePlace:'iPhone 16, Car...', optional:'(optional)', saveGoalBtn:'Save',
+       howMuchToSave:'How much to save?', inDays:'In {n} days', ago:'{n} days ago',
+       tomorrow:'Tomorrow', days:'days', resetConfirm:'Reset all data?', feedbackSuccess:'Thank you for your feedback! We will definitely consider it.',
+       loading:'Loading...', morning:'Good morning', afternoon:'Good afternoon', evening:'Good evening',
+       debtOweLog:'Debt: ', debtLentLog:'Lent: ', debtClosedLog:'Debt closed: ',
+       debtReturnedLog:'returned', debtReceivedLog:'received', debtPaidAlready:'Paid:', debtReturnedAlready:'Returned:',
+       partially:'Partially', closed:'Closed', historyOp:'Operation', salaryLog:'Salary',
+       autoExpenseAccum:'Auto-expense (accumulated)', subscription:'Subscriptions', fromSavings:'From savings',
+       savings:'Savings', oweMe:'Owed to me', oweTo:'I owe', extraIncome:'Extra Income',
+       savingsBalance:'Savings Balance', autoSavingsMo:'Auto-savings / month', paydaySett:'Pay Day',
+       auto:'Auto'
   },
 };
 
@@ -124,24 +171,29 @@ const sendBotMsg=(text,endpoint='/notify')=>{
 };
 
 // Specialized notifiers
-const notifySalary=(salary,monthlySavings,currency)=>sendBotMsg(
-  `💰 <b>Зарплата подтверждена!</b>\n\nПоступило: <code>${fmt(salary,currency)}</code>${monthlySavings>0?`\nАвто-накопления: <code>${fmt(monthlySavings,currency)}</code> → Копилка 🏦`:''}\n\nОткройте KeepIt чтобы увидеть обновлённый баланс.`
+const notifySalary=(salary,monthlySavings,currency,lang='ru')=>{
+  const t=T[lang];
+  sendBotMsg(`💰 <b>${t.salaryConfirmedLog}!</b>\n\n${t.received}: <code>${fmt(salary,currency,lang)}</code>${monthlySavings>0?`\n${t.saveAuto}: <code>${fmt(monthlySavings,currency,lang)}</code> → ${t.savings} 🏦`:''}\n\n${lang==='en'?'Open KeepIt to see updated balance.':'Откройте KeepIt чтобы увидеть обновлённый баланс.'}`);
+};
+const notifySalaryPending=(lang='ru')=>sendBotMsg(
+  lang==='en'?'⏰ <b>Salary not received yet</b>\n\nWe will remind you tomorrow. Don\'t forget to confirm in KeepIt when it arrives! 💸':'⏰ <b>Зарплата ещё не поступила</b>\n\nНапомним завтра. Не забудьте подтвердить в KeepIt когда придёт! 💸'
 );
-const notifySalaryPending=()=>sendBotMsg(
-  `⏰ <b>Зарплата ещё не поступила</b>\n\nНапомним завтра. Не забудьте подтвердить в KeepIt когда придёт! 💸`
-);
-const notifyDebt=(name,amount,type,currency)=>sendBotMsg(
-  `${type==='owe'?'💸':'🤝'} <b>Новый долг</b>\n\n${type==='owe'?'Вы должны':'Вам должны'}: <b>${name}</b>\nСумма: <code>${fmt(amount,currency)}</code>\n\nОткройте KeepIt → Долги.`
-);
-const notifyDebtPaid=(name,amount,currency)=>sendBotMsg(
-  `✅ <b>Долг закрыт!</b>\n\n<b>${name}</b> — <code>${fmt(amount,currency)}</code>\n\nОтличная работа! 🎉`
-);
-const notifyBigExpense=(name,amount,currency)=>sendBotMsg(
-  `📤 <b>Крупный расход</b>\n\n<b>${name}</b>: <code>${fmt(amount,currency)}</code>\n\nЗафиксировано в KeepIt.`
-);
+const notifyDebt=(name,amount,type,currency,lang='ru')=>{
+  const t=T[lang];
+  sendBotMsg(`${type==='owe'?'💸':'🤝'} <b>${type==='owe'?t.debtOweLog:t.debtLentLog}${name}</b>\n\n${t.debtAmount}: <code>${fmt(amount,currency,lang)}</code>\n\n${lang==='en'?'Open KeepIt → Debts.':'Откройте KeepIt → Долги.'}`);
+};
+const notifyDebtPaid=(name,amount,currency,lang='ru')=>{
+  const t=T[lang];
+  sendBotMsg(`✅ <b>${t.debtClosedLog}${name}!</b>\n\n<b>${name}</b> — <code>${fmt(amount,currency,lang)}</code>\n\n${lang==='en'?'Great job! 🎉':'Отличная работа! 🎉'}`);
+};
+const notifyBigExpense=(name,amount,currency,lang='ru')=>{
+  const t=T[lang];
+  sendBotMsg(`📤 <b>${t.largeExpenseDefault}</b>\n\n<b>${name}</b>: <code>${fmt(amount,currency,lang)}</code>\n\n${lang==='en'?'Recorded in KeepIt.':'Зафиксировано в KeepIt.'}`);
+};
 
 function calcBalance(data) {
   const now=todayDate();
+  const lang=data.lang||'ru';
   const y=now.getFullYear(), m=now.getMonth(), d=now.getDate();
   const total=daysInMonth(y,m);
   const fe=data.fixedExpenses||[], cats=data.categories||[], be=data.bigExpenses||[];
@@ -192,10 +244,10 @@ const logActivity=(data,entry)=>({...data,activityLog:[...(data.activityLog||[])
 
 function FlyChip({text,onDone}){ return <div className="fly-chip" onAnimationEnd={onDone}>{text}</div>; }
 
-function FormattedInput({value, onChange, placeholder, style, className}) {
-  const valStr = (value===0||value) ? new Intl.NumberFormat('ru-RU').format(value) : '';
+function FormattedInput({value, onChange, placeholder, style, className, lang='ru'}) {
+  const valStr = (value===0||value) ? new Intl.NumberFormat(lang==='en'?'en-US':'ru-RU').format(value) : '';
   const handleChange = (e) => {
-    const raw = e.target.value.replace(/\s/g, '');
+    const raw = e.target.value.replace(/\s/g, '').replace(/,/g, '');
     if(raw==='') { onChange(''); return; }
     const num = parseFloat(raw);
     if(!isNaN(num)) onChange(num);
@@ -216,7 +268,7 @@ function NumPadSheet({title,currency,onClose,onConfirm,showSavings,showName,lang
       <div className="sheet-handle"/>
       <div className="sheet-title">{title}</div>
       {showName && <input className="glass-input" placeholder={t.bigExpenseTitle} value={name} onChange={e=>setName(e.target.value)} style={{marginBottom:12}}/>}
-      <div className="amount-display">{(+val||0).toLocaleString('ru-RU')}<span style={{fontSize:18,color:'var(--text2)',marginLeft:6}}>{currency}</span></div>
+      <div className="amount-display">{(+val||0).toLocaleString(lang==='en'?'en-US':'ru-RU')}<span style={{fontSize:18,color:'var(--text2)',marginLeft:6}}>{currency}</span></div>
       {showSavings && <div className="toggle-row"><label>{t.fromSavings}</label><label className="toggle"><input type="checkbox" checked={fromSav} onChange={e=>setFromSav(e.target.checked)}/><span className="toggle-slider"/></label></div>}
       <div className="numpad">{['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=><button key={k} className={`num-key${k==='⌫'?' del':''}`} onClick={()=>press(k)}>{k}</button>)}</div>
       <button className="num-key ok" style={{width:'100%',borderRadius:16,fontSize:16,marginTop:4}} onClick={confirm}>{t.done}</button>
@@ -246,8 +298,8 @@ function Onboarding({onDone}){
             <option value="en" style={{color:'#000'}}>🇬🇧 English</option>
           </select>
           <select className="glass-input" value={d.theme||'light'} onChange={e=>{upd('theme',e.target.value); document.documentElement.setAttribute('data-theme',e.target.value);}} style={{flex:1}}>
-            <option value="light" style={{color:'#000'}}>☀️ Светлая</option>
-            <option value="dark" style={{color:'#000'}}>🌙 Тёмная</option>
+            <option value="light" style={{color:'#000'}}>☀️ {t.light}</option>
+            <option value="dark" style={{color:'#000'}}>🌙 {t.dark}</option>
           </select>
         </div>
 
@@ -265,7 +317,7 @@ function Onboarding({onDone}){
     {emoji:'💰',title:t.yourSalary,sub:t.yourSalarySub,content:(
       <div>
         <div className="input-group" style={{display:'flex',gap:8}}>
-          <FormattedInput placeholder="4 000 000" value={d.salary} onChange={v=>upd('salary',v)} style={{flex:1}}/>
+          <FormattedInput placeholder="4 000 000" value={d.salary} onChange={v=>upd('salary',v)} style={{flex:1}} lang={d.lang}/>
           <select className="glass-input" value={d.currency} onChange={e=>upd('currency',e.target.value)} style={{width:90}}>
             {CURRENCIES.map(c=><option key={c} style={{background:'var(--bg)'}}>{c}</option>)}
           </select>
@@ -275,25 +327,25 @@ function Onboarding({onDone}){
     )},
     {emoji:'🍽️',title:t.dailyBudget,sub:t.dailyBudgetSub,content:(
       <div>
-        <div style={{fontSize:12,color:'var(--text2)',marginBottom:8}}>💡 Это включает еду и транспорт вместе</div>
+        <div style={{fontSize:12,color:'var(--text2)',marginBottom:8}}>{t.dailyBudgetHint}</div>
         <div className="input-group">
-          <FormattedInput placeholder="50 000" value={d.dailyAmount} onChange={v=>upd('dailyAmount',v)}/>
-          <span className="input-suffix">{d.currency} / день</span>
+          <FormattedInput placeholder="50 000" value={d.dailyAmount} onChange={v=>upd('dailyAmount',v)} lang={d.lang}/>
+          <span className="input-suffix">{d.currency} {t.perDay}</span>
         </div>
-        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>≈ {fmtShort((parseFloat(String(d.dailyAmount).replace(/\s/g,''))||0)*22)} {d.currency} в месяц (22 раб. дня)</div>
+        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>≈ {fmtShort((parseFloat(String(d.dailyAmount).replace(/\s/g,''))||0)*22, d.currency, d.lang)} {t.perMonth} (22 {t.workDays})</div>
       </div>
     )},
     {emoji:'💹',title:t.saveAuto,sub:t.saveAutoSub,content:(
       <div>
         <div className="input-group">
-          <FormattedInput placeholder="2 000 000" value={d.monthlySavings} onChange={v=>upd('monthlySavings',v)}/>
+          <FormattedInput placeholder="2 000 000" value={d.monthlySavings} onChange={v=>upd('monthlySavings',v)} lang={d.lang}/>
           <span className="input-suffix">{d.currency}</span>
         </div>
       </div>
     )},
     {emoji:'🏦',title:t.saveTarget,sub:t.saveTargetSub,content:(
       <div className="input-group">
-        <FormattedInput placeholder="0" value={d.savings} onChange={v=>upd('savings',v)}/>
+        <FormattedInput placeholder="0" value={d.savings} onChange={v=>upd('savings',v)} lang={d.lang}/>
         <span className="input-suffix">{d.currency}</span>
       </div>
     )},
@@ -303,7 +355,7 @@ function Onboarding({onDone}){
     {emoji:'💵',title:t.pocketMoney,sub:t.pocketMoneySub,content:(
       <div>
         <div className="input-group" style={{display:'flex',gap:8,marginBottom:12}}>
-          <FormattedInput placeholder="500 000" value={d.pocketMoney} onChange={v=>upd('pocketMoney',v)} style={{flex:1}}/>
+          <FormattedInput placeholder="500 000" value={d.pocketMoney} onChange={v=>upd('pocketMoney',v)} style={{flex:1}} lang={d.lang}/>
           <select className="glass-input" value={d.currency} onChange={e=>upd('currency',e.target.value)} style={{width:90}}>
             {CURRENCIES.map(c=><option key={c} style={{background:'var(--bg)'}}>{c}</option>)}
           </select>
@@ -315,14 +367,14 @@ function Onboarding({onDone}){
     {emoji:'🍽️',title:t.dailyBudget,sub:t.studentDailySub,content:(
       <div>
         <div className="input-group">
-          <FormattedInput placeholder="30 000" value={d.dailyAmount} onChange={v=>upd('dailyAmount',v)}/>
-          <span className="input-suffix">{d.currency} / день</span>
+          <FormattedInput placeholder="30 000" value={d.dailyAmount} onChange={v=>upd('dailyAmount',v)} lang={d.lang}/>
+          <span className="input-suffix">{d.currency} {t.perDay}</span>
         </div>
       </div>
     )},
     {emoji:'🏦',title:t.saveTarget,sub:t.saveTargetSub,content:(
       <div className="input-group">
-        <FormattedInput placeholder="0" value={d.savings} onChange={v=>upd('savings',v)}/>
+        <FormattedInput placeholder="0" value={d.savings} onChange={v=>upd('savings',v)} lang={d.lang}/>
         <span className="input-suffix">{d.currency}</span>
       </div>
     )},
@@ -367,7 +419,7 @@ function Dashboard({data,setData}){
   const addEv=()=>{if(!evForm.name||!evForm.date)return;haptic('medium');setData(d=>({...d,events:[...(d.events||[]),{id:Date.now(),name:evForm.name,date:evForm.date,budget:parseFloat(evForm.budget)||0}]}));setShowEvForm(false);setEvForm({name:'',date:'',budget:''});};
   const progress=Math.max(0,Math.min(100,grossBalance/Math.max(1,totalIncome)*100));
   const h=now.getHours();
-  const greeting=data.lang==='en'?(h<12?'Good morning':h<17?'Good afternoon':'Good evening'):(h<12?'Доброе утро':h<17?'Добрый день':'Добрый вечер');
+  const greeting=data.lang==='en'?(h<12?t.morning:h<17?t.afternoon:t.evening):(h<12?t.morning:h<17?t.afternoon:t.evening);
   const userName=tg?.initDataUnsafe?.user?.first_name||'';
   const todayStr=now.toDateString();
   const showSalary=data.userType!=='student'&&data.salaryDay>0&&now.getDate()>=data.salaryDay&&data.salaryConfirmedMonth!==monthKey()&&data.salaryLastAsked!==todayStr;
@@ -378,39 +430,40 @@ function Dashboard({data,setData}){
       // Auto-deposit monthlySavings to savings
       if(d.monthlySavings>0){
         next.savingsBalance=(d.savingsBalance||0)+d.monthlySavings;
-        next.savingsHistory=[...(d.savingsHistory||[]),{id:Date.now(),date:now.toISOString(),type:'deposit',amount:d.monthlySavings,note:'Авто-накопления с зарплаты'}];
+        next.savingsHistory=[...(d.savingsHistory||[]),{id:Date.now(),date:now.toISOString(),type:'deposit',amount:d.monthlySavings,note:t.autoSavingsLog}];
       }
-      notifySalary(d.salary,d.monthlySavings,d.currency);
-      return logActivity(next,{type:'income',label:'Зарплата получена',amount:d.salary,color:'#2d7d46'});
+      notifySalary(d.salary,d.monthlySavings,d.currency,d.lang);
+      return logActivity(next,{type:'income',label:t.salaryConfirmedLog,amount:d.salary,color:'#2d7d46'});
     });
   };
   const dismissSalaryTomorrow=()=>{
     haptic('light');
     setData(d=>({...d,salaryLastAsked:todayStr}));
-    notifySalaryPending();
+    notifySalaryPending(data.lang);
   };
   const thisMonthBig=(data.bigExpenses||[]).filter(be=>{const bd=new Date(be.date);return bd.getMonth()===now.getMonth()&&bd.getFullYear()===now.getFullYear();});
   const thisSpent=thisMonthBig.filter(b=>!b.fromSavings).reduce((s,b)=>s+b.amount,0)+catSpent+fixedPaid;
   const lastSpent=data.lastMonthSpent||0;
   const cmpPct=lastSpent>0?Math.round((thisSpent-lastSpent)/lastSpent*100):null;
   const addBig=(amount,extras)=>{
-    const exp={id:Date.now(),name:extras.name||(data.lang==='en'?'Large Expense':'Крупный расход'),icon:'💸',amount,date:now.toISOString(),fromSavings:extras.fromSavings||false};
+    const exp={id:Date.now(),name:extras.name||t.largeExpenseDefault,icon:'💸',amount,date:now.toISOString(),fromSavings:extras.fromSavings||false};
     setData(d=>{
       const next={...d,bigExpenses:[...(d.bigExpenses||[]),exp]};
-      if(extras.fromSavings){next.savingsBalance=Math.max(0,(d.savingsBalance||0)-amount);next.savingsHistory=[...(d.savingsHistory||[]),{id:Date.now(),date:now.toISOString(),type:'withdraw',amount,note:extras.name||'Крупный расход'}];}
-      return logActivity(next,{type:'expense',label:extras.name||'Крупный расход',amount,color:'#c0392b'});
+      if(extras.fromSavings){next.savingsBalance=Math.max(0,(d.savingsBalance||0)-amount);next.savingsHistory=[...(d.savingsHistory||[]),{id:Date.now(),date:now.toISOString(),type:'withdraw',amount,note:extras.name||t.largeExpenseDefault}];}
+      notifyBigExpense(extras.name||t.largeExpenseDefault,amount,d.currency,d.lang);
+      return logActivity(next,{type:'expense',label:extras.name||t.largeExpenseDefault,amount,color:'#c0392b'});
     });
-    setChip(`-${fmtShort(amount)} ${data.currency}`);setSheet(null);setTimeout(()=>setChip(null),700);
+    setChip(`-${fmtShort(amount, data.currency, data.lang)}`);setSheet(null);setTimeout(()=>setChip(null),700);
   };
   const addIncome=(amount,extras)=>{
     haptic('medium');notify('success');
-    const entry={id:Date.now(),amount,note:extras?.name||(data.lang==='en'?'Extra Income':'Доп. доход'),date:now.toISOString()};
+    const entry={id:Date.now(),amount,note:extras?.name||t.extraIncomeDefault,date:now.toISOString()};
     setData(d=>{
       const next={...d,incomeEntries:[...(d.incomeEntries||[]),entry]};
       if(d.userType==='student') next.pocketMoney=(d.pocketMoney||0)+amount;
       return logActivity(next,{type:'income',label:entry.note,amount,color:'#2d7d46'});
     });
-    setChip(`+${fmtShort(amount)} ${data.currency}`);setIncomeSheet(false);setTimeout(()=>setChip(null),700);
+    setChip(`+${fmtShort(amount, data.currency, data.lang)}`);setIncomeSheet(false);setTimeout(()=>setChip(null),700);
   };
   return(
     <div className="page">
@@ -420,24 +473,24 @@ function Dashboard({data,setData}){
       </div>
       <div className="balance-card fade-up d1">
         <div className="bal-label">{t.available}</div>
-        <div className="bal-amount">{fmt(balance,data.currency)}</div>
-        <div className="bal-sub">{data.userType==='student'?t.pocketMoney:t.salary}: {fmt(totalIncome,data.currency)}{extraIncome>0&&` (+ ${fmtShort(extraIncome)} ${data.lang==='en'?'extra':'доп.'})`}</div>
+        <div className="bal-amount">{fmt(balance,data.currency,data.lang)}</div>
+        <div className="bal-sub">{data.userType==='student'?t.pocketMoney:t.salary}: {fmt(totalIncome,data.currency,data.lang)}{extraIncome>0&&` (+ ${fmtShort(extraIncome, data.currency, data.lang)} ${t.extra})`}</div>
         <div className="pbar-wrap"><div className="pbar-fill" style={{width:progress+'%'}}/></div>
-        <div className="pbar-labels"><span>{daysLeft} {data.lang==='en'?'days left':'дн. осталось'}</span><span>{Math.round(100-progress)}% {t.spent.toLowerCase()}</span></div>
+        <div className="pbar-labels"><span>{daysLeft} {t.daysLeft}</span><span>{Math.round(100-progress)}% {t.spentLower}</span></div>
       </div>
       <div className="breakdown-card fade-up d1">
-        <div className="bd-row"><span className="label">{data.userType==='student'?`💵 ${t.pocketMoney}`:`💰 ${t.salary}`}</span><span className="val">{fmt(baseSalary,data.currency)}</span></div>
-        {extraIncome>0&&<div className="bd-row"><span className="label">➕ {t.extraIncomeBtn.substring(2)}</span><span className="val" style={{color:'var(--green)'}}>+{fmt(extraIncome,data.currency)}</span></div>}
-        <div className="bd-row"><span className="label">🍽️ {t.autoExpenses} / {data.lang==='en'?'mo':'мес'}</span><span className="val" style={{color:'var(--coral)'}}>-{fmt(catMonthly,data.currency)}</span></div>
-        {fixedMonthly>0&&<div className="bd-row"><span className="label">📱 {t.subscriptions}</span><span className="val" style={{color:'var(--coral)'}}>-{fmt(fixedMonthly,data.currency)}</span></div>}
-        {monthlySav>0&&<div className="bd-row"><span className="label">🏦 {t.saveAuto}</span><span className="val" style={{color:'var(--blue)'}}>-{fmt(monthlySav,data.currency)}</span></div>}
+        <div className="bd-row"><span className="label">{data.userType==='student'?`💵 ${t.pocketMoney}`:`💰 ${t.salary}`}</span><span className="val">{fmt(baseSalary,data.currency,data.lang)}</span></div>
+        {extraIncome>0&&<div className="bd-row"><span className="label">➕ {t.extraIncomeBtn.substring(2)}</span><span className="val" style={{color:'var(--green)'}}>{fmt(extraIncome,data.currency,data.lang)}</span></div>}
+        <div className="bd-row"><span className="label">🍽️ {t.autoExpenses} / {t.mo}</span><span className="val" style={{color:'var(--coral)'}}>-{fmt(catMonthly,data.currency,data.lang)}</span></div>
+        {fixedMonthly>0&&<div className="bd-row"><span className="label">📱 {t.subscriptions}</span><span className="val" style={{color:'var(--coral)'}}>-{fmt(fixedMonthly,data.currency,data.lang)}</span></div>}
+        {monthlySav>0&&<div className="bd-row"><span className="label">🏦 {t.saveAuto}</span><span className="val" style={{color:'var(--blue)'}}>-{fmt(monthlySav,data.currency,data.lang)}</span></div>}
         <div className="bd-divider"/>
-        <div className="bd-row bd-total"><span className="label">{t.available}</span><span className="val" style={{color:balance>=0?'var(--green)':'var(--coral)'}}>{fmt(balance,data.currency)}</span></div>
+        <div className="bd-row bd-total"><span className="label">{t.available}</span><span className="val" style={{color:balance>=0?'var(--green)':'var(--coral)'}}>{fmt(balance,data.currency,data.lang)}</span></div>
       </div>
       {showSalary&&(
         <div className="card fade-up d2" style={{margin:'0 20px 12px',padding:'16px'}}>
           <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>💸 {t.salaryOfDate} {now.getDate()}</div>
-          <div style={{fontSize:12,color:'var(--text2)',marginBottom:12}}>{fmt(data.salary,data.currency)}{data.monthlySavings>0?` · ${t.saveAuto} ${fmt(data.monthlySavings,data.currency)}`:''}</div>
+          <div style={{fontSize:12,color:'var(--text2)',marginBottom:12}}>{fmt(data.salary,data.currency,data.lang)}{data.monthlySavings>0?` · ${t.saveAuto} ${fmt(data.monthlySavings,data.currency,data.lang)}`:''}</div>
           <div style={{display:'flex',gap:8}}>
             <button className="btn-primary" style={{flex:2,margin:0,padding:'11px 0',background:'linear-gradient(135deg,#2d7d46,#1a5c32)'}} onClick={confirmSalary}>{t.salaryConfirmed}</button>
             <button className="btn-ghost" style={{flex:1,margin:0,padding:'11px 0',fontSize:12}} onClick={dismissSalaryTomorrow}>{t.salaryNotYet}</button>
@@ -447,19 +500,19 @@ function Dashboard({data,setData}){
       <div className="daily-card fade-up d2">
         <div style={{fontSize:26}}>💡</div>
         <div style={{flex:1}}>
-          <div className="dc-label">{data.lang==='en'?'You can spend today':'Сегодня можно потратить'}</div>
-          <div className="dc-amount">{fmt(dailyBudget,data.currency)}</div>
+          <div className="dc-label">{t.youCanSpend}</div>
+          <div className="dc-amount">{fmt(dailyBudget,data.currency,data.lang)}</div>
           <div className="dc-days">
             {data.userType==='worker'
-              ? `${daysLeft} ${data.lang==='en'?'days until salary':'дн. до зарплаты'}`
-              : `${daysLeft} ${data.lang==='en'?'days left of':'дн. из'} ${totalPeriod}`}
+              ? `${daysLeft} ${t.daysUntilSalary}`
+              : `${daysLeft} ${t.daysLeftOf} ${totalPeriod}`}
           </div>
         </div>
       </div>
       {cmpPct!==null&&(
         <div className="cmp-card fade-up d3">
           <div className="cmp-icon">📊</div>
-          <div className="cmp-info"><div className="cmp-title">{data.lang==='en'?'vs last month':'Сравнение с прошлым месяцем'}</div><div className="cmp-val">{fmt(thisSpent,data.currency)}</div></div>
+          <div className="cmp-info"><div className="cmp-title">{t.vsLastMonth}</div><div className="cmp-val">{fmt(thisSpent,data.currency,data.lang)}</div></div>
           <span className={`cmp-badge ${cmpPct<=0?'better':'worse'}`}>{cmpPct<=0?'▼':'▲'} {Math.abs(cmpPct)}%</span>
         </div>
       )}
@@ -468,7 +521,7 @@ function Dashboard({data,setData}){
         <div className="cat-merged-card fade-up d3">
           <div className="cat-merged-header">
             <div className="cat-merged-title">🍽️ {t.autoExpenses}</div>
-            <div className="cat-merged-total">-{fmtShort(catSpent)} / {fmtShort(catMonthly)}</div>
+            <div className="cat-merged-total">-{fmtShort(catSpent, data.currency, data.lang)} / {fmtShort(catMonthly, data.currency, data.lang)}</div>
           </div>
           <div className="pbar-wrap" style={{marginBottom:12}}><div className="pbar-fill" style={{width:Math.min(100,catSpent/catMonthly*100)+'%',background:'var(--coral)'}}/></div>
           {(data.categories||[]).map(c=>{
@@ -476,7 +529,7 @@ function Dashboard({data,setData}){
             return(<div className="cat-sub-row" key={c.id}>
               <div className="cat-sub-icon">{c.icon}</div>
               <div className="cat-sub-name">{c.name}</div>
-              <div className="cat-sub-val">{fmtShort(s)} / {fmtShort(c.monthlyLimit)}</div>
+              <div className="cat-sub-val">{fmtShort(s, data.currency, data.lang)} / {fmtShort(c.monthlyLimit, data.currency, data.lang)}</div>
             </div>);
           })}
         </div>
@@ -501,9 +554,9 @@ function Dashboard({data,setData}){
             <div className="bi-icon">{be.icon}</div>
             <div className="bi-info">
               <div className="bi-name">{be.name}{be.fromSavings&&<span className="bi-savings-tag">{t.saved}</span>}</div>
-              <div className="bi-date">{fmtDate(be.date)}</div>
+              <div className="bi-date">{fmtDate(be.date, data.lang)}</div>
             </div>
-            <div className="bi-amount" style={{color:be.fromSavings?'var(--blue)':'var(--coral)'}}>-{fmt(be.amount,data.currency)}</div>
+            <div className="bi-amount" style={{color:be.fromSavings?'var(--blue)':'var(--coral)'}}>-{fmt(be.amount,data.currency,data.lang)}</div>
           </div>
         ))}
         <button className="add-btn" onClick={()=>{haptic('light');setSheet(true);}}>{t.addLargeExpense}</button>
@@ -516,9 +569,9 @@ function Dashboard({data,setData}){
         {/* this month extra income entries */}
         {(data.incomeEntries||[]).filter(e=>{const d=new Date(e.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).map(e=>(
           <div className="sav-history-item" key={e.id} style={{marginBottom:5}}>
-            <div className="shi-icon">\ud83d\udcb5</div>
-            <div className="shi-info"><div className="shi-note">{e.note}</div><div className="shi-date">{fmtDate(e.date)}</div></div>
-            <div className="shi-amount in">+{fmt(e.amount,data.currency)}</div>
+            <div className="shi-icon">💵</div>
+            <div className="shi-info"><div className="shi-note">{e.note}</div><div className="shi-date">{fmtDate(e.date, data.lang)}</div></div>
+            <div className="shi-amount in">+{fmt(e.amount,data.currency,data.lang)}</div>
           </div>
         ))}
       </div>
@@ -536,11 +589,11 @@ function Dashboard({data,setData}){
             </div>
             <div style={{flex:1}}>
               <div className="ev-name">{ev.name}</div>
-              <div className="ev-sub">{dl===0?`🎉 ${t.today}!`:dl===1?`${t.yesterday}!`:data.lang==='en'?`In ${dl} days`:`Через ${dl} дн.`}</div>
+              <div className="ev-sub">{dl===0?`🎉 ${t.today}!`:dl===1?`${t.yesterday}!`:t.inDays.replace('{n}',dl)}</div>
               <div style={{display:'flex',gap:5,flexWrap:'wrap',marginTop:3}}>
-                {isW&&<span className="ev-badge week">⚡ {dl} дн.</span>}
-                {isM&&<span className="ev-badge month">📅 {dl} дн.</span>}
-                {ev.budget>0&&<span className="ev-badge budget">💰 {fmtShort(ev.budget)}</span>}
+                {isW&&<span className="ev-badge week">⚡ {dl} {t.days}</span>}
+                {isM&&<span className="ev-badge month">📅 {dl} {t.days}</span>}
+                {ev.budget>0&&<span className="ev-badge budget">💰 {fmtShort(ev.budget, data.currency, data.lang)}</span>}
               </div>
             </div>
             <button style={{background:'none',border:'none',color:'var(--text3)',fontSize:14,cursor:'pointer',padding:4}} onClick={()=>{haptic('medium');setData(d=>({...d,events:(d.events||[]).filter(x=>x.id!==ev.id)}))}}>✕</button>
@@ -550,7 +603,7 @@ function Dashboard({data,setData}){
           <div className="card fade-up" style={{padding:14,marginBottom:8}}>
             <input className="glass-input" placeholder={t.eventName} value={evForm.name} onChange={e=>setEvForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
             <input className="glass-input" type="date" value={evForm.date} onChange={e=>setEvForm(p=>({...p,date:e.target.value}))} style={{marginBottom:10,colorScheme:'light'}}/>
-            <FormattedInput placeholder={t.eventBudget} value={evForm.budget} onChange={v=>setEvForm(p=>({...p,budget:v}))} style={{marginBottom:12}}/>
+            <FormattedInput placeholder={t.eventBudget} value={evForm.budget} onChange={v=>setEvForm(p=>({...p,budget:v}))} style={{marginBottom:12}} lang={data.lang}/>
             <button className="btn-primary" onClick={addEv}>{t.addEvent.substring(2)}</button>
             <button className="btn-ghost" onClick={()=>setShowEvForm(false)}>{t.cancel}</button>
           </div>
@@ -559,8 +612,8 @@ function Dashboard({data,setData}){
         )}
       </div>
 
-      {sheet&&<NumPadSheet title={data.lang==='en'?'💸 Large Expense':'💸 Крупный расход'} currency={data.currency} onClose={()=>setSheet(null)} onConfirm={addBig} showSavings showName lang={data.lang}/>}
-      {incomeSheet&&<NumPadSheet title={data.lang==='en'?'➕ Extra Income':'➕ Доп. доход'} currency={data.currency} onClose={()=>setIncomeSheet(false)} onConfirm={addIncome} showName lang={data.lang}/>}
+      {sheet&&<NumPadSheet title={t.largeExpenseDefault} currency={data.currency} onClose={()=>setSheet(null)} onConfirm={addBig} showSavings showName lang={data.lang}/>}
+      {incomeSheet&&<NumPadSheet title={t.extraIncomeDefault} currency={data.currency} onClose={()=>setIncomeSheet(false)} onConfirm={addIncome} showName lang={data.lang}/>}
       {chip&&<FlyChip text={chip} onDone={()=>setChip(null)}/>}
     </div>
   );
@@ -604,32 +657,30 @@ function BudgetPage({data,setData}){
           showCF && catE.id === c.id ? (
             <div className="card" key={c.id} style={{padding:16,marginTop:4,marginBottom:8}}>
               <div className="icon-row">{ICONS.slice(0,10).map(ic=><span key={ic} className={`icon-opt${selIcon===ic?' selected':''}`} onClick={()=>setSelIcon(ic)}>{ic}</span>)}</div>
-              <input className="glass-input" placeholder="Название" value={catE.name} onChange={e=>setCatE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-              <FormattedInput placeholder="Лимит в месяц" value={catE.monthlyLimit} onChange={v=>setCatE(p=>({...p,monthlyLimit:v}))} style={{marginBottom:10}}/>
+              <input className="glass-input" placeholder={t.eventName} value={catE.name} onChange={e=>setCatE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+              <FormattedInput placeholder={t.limitMonth} value={catE.monthlyLimit} onChange={v=>setCatE(p=>({...p,monthlyLimit:v}))} style={{marginBottom:10}} lang={data.lang}/>
               <div style={{display:'flex',gap:8,marginBottom:12}}>
-                <button className={`btn-sm ${catE.deductType==='daily'?'active':''}`} style={{flex:1,padding:'8px',background:catE.deductType==='daily'?'var(--accent-soft)':'var(--surface2)',color:catE.deductType==='daily'?'var(--accent)':'var(--text2)',borderColor:catE.deductType==='daily'?'var(--accent)':'var(--border)'}} onClick={()=>setCatE(p=>({...p,deductType:'daily'}))}>По частям</button>
-                <button className={`btn-sm ${catE.deductType==='upfront'?'active':''}`} style={{flex:1,padding:'8px',background:catE.deductType==='upfront'?'var(--accent-soft)':'var(--surface2)',color:catE.deductType==='upfront'?'var(--accent)':'var(--text2)',borderColor:catE.deductType==='upfront'?'var(--accent)':'var(--border)'}} onClick={()=>setCatE(p=>({...p,deductType:'upfront'}))}>Сразу за месяц</button>
+                <button className={`btn-sm ${catE.deductType==='daily'?'active':''}`} style={{flex:1,padding:'8px',background:catE.deductType==='daily'?'var(--accent-soft)':'var(--surface2)',color:catE.deductType==='daily'?'var(--accent)':'var(--text2)',borderColor:catE.deductType==='daily'?'var(--accent)':'var(--border)'}} onClick={()=>setCatE(p=>({...p,deductType:'daily'}))}>{t.partMonth}</button>
+                <button className={`btn-sm ${catE.deductType==='upfront'?'active':''}`} style={{flex:1,padding:'8px',background:catE.deductType==='upfront'?'var(--accent-soft)':'var(--surface2)',color:catE.deductType==='upfront'?'var(--accent)':'var(--text2)',borderColor:catE.deductType==='upfront'?'var(--accent)':'var(--border)'}} onClick={()=>setCatE(p=>({...p,deductType:'upfront'}))}>{t.immediatelyMonth}</button>
               </div>
               <button className="btn-primary" onClick={saveCat}>{t.save}</button><button className="btn-ghost" onClick={()=>{setShowCF(false);setCatE({id:'',name:'',monthlyLimit:'',deductType:'daily'});}}>{t.cancel}</button>
             </div>
           ) : (
-            <div className="fixed-tile" key={c.id} style={{borderLeft:`3px solid ${c.color||'var(--coral)'}`,cursor:'pointer'}} onClick={()=>{setCatE({id:c.id,name:c.name,monthlyLimit:c.monthlyLimit,deductType:c.deductType||'daily'});setSelIcon(c.icon);setShowCF(true);}}><div className="ft-icon">{c.icon}</div><div className="ft-info"><div className="ft-name">{c.name} {c.deductType==='upfront'&&<span style={{fontSize:10,color:'var(--blue)'}}>Сразу</span>}</div><div className="ft-day">{fmt(c.monthlyLimit,data.currency)} / мес</div></div><button className="btn-sm" style={{color:'var(--coral)'}} onClick={(e)=>{e.stopPropagation();haptic('medium');setData(d=>({...d,categories:(d.categories||[]).filter(x=>x.id!==c.id)}))}}>✕</button></div>
+            <div className="fixed-tile" key={c.id} style={{borderLeft:`3px solid ${c.color||'var(--coral)'}`,cursor:'pointer'}} onClick={()=>{setCatE({id:c.id,name:c.name,monthlyLimit:c.monthlyLimit,deductType:c.deductType||'daily'});setSelIcon(c.icon);setShowCF(true);}}><div className="ft-icon">{c.icon}</div><div className="ft-info"><div className="ft-name">{c.name} {c.deductType==='upfront'&&<span style={{fontSize:10,color:'var(--blue)'}}>{t.immediatelyMonth}</span>}</div><div className="ft-day">{fmt(c.monthlyLimit,data.currency,data.lang)} / {t.mo}</div></div><button className="btn-sm" style={{color:'var(--coral)'}} onClick={(e)=>{e.stopPropagation();haptic('medium');setData(d=>({...d,categories:(d.categories||[]).filter(x=>x.id!==c.id)}))}}>✕</button></div>
           )
         ))}
         {showCF && !catE.id ? (
           <div className="card" style={{padding:16,marginTop:4}}>
             <div className="icon-row">{ICONS.slice(0,10).map(ic=><span key={ic} className={`icon-opt${selIcon===ic?' selected':''}`} onClick={()=>setSelIcon(ic)}>{ic}</span>)}</div>
-            <input className="glass-input" placeholder="Название" value={catE.name} onChange={e=>setCatE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-            <FormattedInput placeholder="Лимит в месяц" value={catE.monthlyLimit} onChange={v=>setCatE(p=>({...p,monthlyLimit:v}))} style={{marginBottom:10}}/>
+            <input className="glass-input" placeholder={t.eventName} value={catE.name} onChange={e=>setCatE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+            <FormattedInput placeholder={t.limitMonth} value={catE.monthlyLimit} onChange={v=>setCatE(p=>({...p,monthlyLimit:v}))} style={{marginBottom:10}} lang={data.lang}/>
             <div style={{display:'flex',gap:8,marginBottom:12}}>
-              <button className={`btn-sm ${catE.deductType==='daily'?'active':''}`} style={{flex:1,padding:'8px',background:catE.deductType==='daily'?'var(--accent-soft)':'var(--surface2)',color:catE.deductType==='daily'?'var(--accent)':'var(--text2)',borderColor:catE.deductType==='daily'?'var(--accent)':'var(--border)'}} onClick={()=>setCatE(p=>({...p,deductType:'daily'}))}>По частям</button>
-              <button className={`btn-sm ${catE.deductType==='upfront'?'active':''}`} style={{flex:1,padding:'8px',background:catE.deductType==='upfront'?'var(--accent-soft)':'var(--surface2)',color:catE.deductType==='upfront'?'var(--accent)':'var(--text2)',borderColor:catE.deductType==='upfront'?'var(--accent)':'var(--border)'}} onClick={()=>setCatE(p=>({...p,deductType:'upfront'}))}>Сразу за месяц</button>
+              <button className={`btn-sm ${catE.deductType==='daily'?'active':''}`} style={{flex:1,padding:'8px',background:catE.deductType==='daily'?'var(--accent-soft)':'var(--surface2)',color:catE.deductType==='daily'?'var(--accent)':'var(--text2)',borderColor:catE.deductType==='daily'?'var(--accent)':'var(--border)'}} onClick={()=>setCatE(p=>({...p,deductType:'daily'}))}>{t.partMonth}</button>
+              <button className={`btn-sm ${catE.deductType==='upfront'?'active':''}`} style={{flex:1,padding:'8px',background:catE.deductType==='upfront'?'var(--accent-soft)':'var(--surface2)',color:catE.deductType==='upfront'?'var(--accent)':'var(--text2)',borderColor:catE.deductType==='upfront'?'var(--accent)':'var(--border)'}} onClick={()=>setCatE(p=>({...p,deductType:'upfront'}))}>{t.immediatelyMonth}</button>
             </div>
             <button className="btn-primary" onClick={saveCat}>{t.save}</button><button className="btn-ghost" onClick={()=>{setShowCF(false);setCatE({id:'',name:'',monthlyLimit:'',deductType:'daily'});}}>{t.cancel}</button>
           </div>
-        ) : (
-          !showCF && <button className="add-btn" onClick={()=>{haptic('light');setSelIcon('🍔');setCatE({id:'',name:'',monthlyLimit:'',deductType:'daily'});setShowCF(true);}}>{t.addCategory}</button>
-        )}
+        ) : !showCF && <button className="add-btn" onClick={()=>{haptic('light');setSelIcon('🍔');setCatE({id:'',name:'',monthlyLimit:'',deductType:'daily'});setShowCF(true);}}>{t.addCategory}</button>}
       </div>
       <div className="sec-title" style={{marginTop:6}}>{t.subscriptions}</div>
       <div className="fixed-list fade-up d2">
@@ -637,56 +688,54 @@ function BudgetPage({data,setData}){
           showFF && fixE.id === fe.id ? (
             <div className="card" key={fe.id} style={{padding:16,marginTop:4,marginBottom:8}}>
               <div className="icon-row">{ICONS.map(ic=><span key={ic} className={`icon-opt${selIcon===ic?' selected':''}`} onClick={()=>setSelIcon(ic)}>{ic}</span>)}</div>
-              <input className="glass-input" placeholder="Onefit, Netflix…" value={fixE.name} onChange={e=>setFixE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-              <FormattedInput placeholder="Сумма в месяц" value={fixE.amount} onChange={v=>setFixE(p=>({...p,amount:v}))} style={{marginBottom:10}}/>
-              <input className="glass-input" type="number" placeholder="День списания (1-31)" value={fixE.day} onChange={e=>setFixE(p=>({...p,day:e.target.value}))} style={{marginBottom:12}}/>
+              <input className="glass-input" placeholder={t.subscription} value={fixE.name} onChange={e=>setFixE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+              <FormattedInput placeholder={t.limitMonth} value={fixE.amount} onChange={v=>setFixE(p=>({...p,amount:v}))} style={{marginBottom:10}} lang={data.lang}/>
+              <input className="glass-input" type="number" placeholder={t.billingDay} value={fixE.day} onChange={e=>setFixE(p=>({...p,day:e.target.value}))} style={{marginBottom:12}}/>
               <button className="btn-primary" onClick={saveFix}>{t.save}</button><button className="btn-ghost" onClick={()=>{setShowFF(false);setFixE({id:'',name:'',amount:'',day:'1'});}}>{t.cancel}</button>
             </div>
           ) : (
-            <div className="fixed-tile" key={fe.id} style={{cursor:'pointer'}} onClick={()=>{setFixE({id:fe.id,name:fe.name,amount:fe.amount,day:fe.day});setSelIcon(fe.icon);setShowFF(true);}}><div className="ft-icon">{fe.icon}</div><div className="ft-info"><div className="ft-name">{fe.name}</div><div className="ft-day">{fmt(fe.amount,data.currency)} · {fe.day}-го</div></div><button className="btn-sm" style={{color:'var(--coral)'}} onClick={(e)=>{e.stopPropagation();haptic('medium');setData(d=>({...d,fixedExpenses:(d.fixedExpenses||[]).filter(x=>x.id!==fe.id)}))}}>✕</button></div>
+            <div className="fixed-tile" key={fe.id} style={{cursor:'pointer'}} onClick={()=>{setFixE({id:fe.id,name:fe.name,amount:fe.amount,day:fe.day});setSelIcon(fe.icon);setShowFF(true);}}><div className="ft-icon">{fe.icon}</div><div className="ft-info"><div className="ft-name">{fe.name}</div><div className="ft-day">{fmt(fe.amount,data.currency,data.lang)} · {fe.day}-го</div></div><button className="btn-sm" style={{color:'var(--coral)'}} onClick={(e)=>{e.stopPropagation();haptic('medium');setData(d=>({...d,fixedExpenses:(d.fixedExpenses||[]).filter(x=>x.id!==fe.id)}))}}>✕</button></div>
           )
         ))}
         {showFF && !fixE.id ? (
           <div className="card" style={{padding:16,marginTop:4}}>
             <div className="icon-row">{ICONS.map(ic=><span key={ic} className={`icon-opt${selIcon===ic?' selected':''}`} onClick={()=>setSelIcon(ic)}>{ic}</span>)}</div>
-            <input className="glass-input" placeholder="Onefit, Netflix…" value={fixE.name} onChange={e=>setFixE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-            <FormattedInput placeholder={data.lang==='en'?"Monthly amount":"Сумма в месяц"} value={fixE.amount} onChange={v=>setFixE(p=>({...p,amount:v}))} style={{marginBottom:10}}/>
-            <input className="glass-input" type="number" placeholder={data.lang==='en'?"Billing day (1-31)":"День списания (1-31)"} value={fixE.day} onChange={e=>setFixE(p=>({...p,day:e.target.value}))} style={{marginBottom:12}}/>
+            <input className="glass-input" placeholder={t.subscription} value={fixE.name} onChange={e=>setFixE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+            <FormattedInput placeholder={t.limitMonth} value={fixE.amount} onChange={v=>setFixE(p=>({...p,amount:v}))} style={{marginBottom:10}} lang={data.lang}/>
+            <input className="glass-input" type="number" placeholder={t.billingDay} value={fixE.day} onChange={e=>setFixE(p=>({...p,day:e.target.value}))} style={{marginBottom:12}}/>
             <button className="btn-primary" onClick={saveFix}>{t.save}</button><button className="btn-ghost" onClick={()=>{setShowFF(false);setFixE({id:'',name:'',amount:'',day:'1'});}}>{t.cancel}</button>
           </div>
-        ) : (
-          !showFF && <button className="add-btn" onClick={()=>{haptic('light');setSelIcon('💪');setFixE({id:'',name:'',amount:'',day:'1'});setShowFF(true);}}>{t.addSubscription}</button>
-        )}
+        ) : !showFF && <button className="add-btn" onClick={()=>{haptic('light');setSelIcon('💪');setFixE({id:'',name:'',amount:'',day:'1'});setShowFF(true);}}>{t.addSubscription}</button>}
       </div>
       <div className="sec-title" style={{marginTop:6}}>🎓 {t.contracts}</div>
       <div style={{padding:'0 20px'}}>
         {(data.contracts||[]).map(con=>(
           <div className="contract-card" key={con.id}>
             <div className="contract-name">{con.icon} {con.name}</div>
-            <div className="contract-total">{data.lang==='en'?'Total:':'Итого:'} {fmt(con.totalAmount,data.currency)}</div>
+            <div className="contract-total">{t.total} {fmt(con.totalAmount,data.currency,data.lang)}</div>
             {con.installments.map((ins,i)=>(
               <div className="contract-payment" key={i}>
                 <div className="cp-pct">{ins.percent}%</div>
-                <div className="cp-info"><div className="cp-amount">{fmt(ins.amount,data.currency)}</div>{ins.dueDate&&<div className="cp-date">{data.lang==='en'?'Due':'До'} {new Date(ins.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'long'})}</div>}</div>
-                <button className={`cp-paid ${ins.paid?'yes':'no'}`} onClick={()=>togglePaid(con.id,ins.id??i)}>{ins.paid?(data.lang==='en'?'✓ Paid':'✓ Оплачено'):(data.lang==='en'?'Unpaid':'Не оплачено')}</button>
+                <div className="cp-info"><div className="cp-amount">{fmt(ins.amount,data.currency,data.lang)}</div>{ins.dueDate&&<div className="cp-date">{t.due} {new Date(ins.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'long'})}</div>}</div>
+                <button className={`cp-paid ${ins.paid?'yes':'no'}`} onClick={()=>togglePaid(con.id,ins.id??i)}>{ins.paid?`✓ ${t.paid}`:t.unpaid}</button>
               </div>
             ))}
-            <button className="btn-sm" style={{marginTop:8,color:'var(--coral)',width:'100%'}} onClick={()=>{haptic('medium');setData(d=>({...d,contracts:(d.contracts||[]).filter(x=>x.id!==con.id)}))}}>{data.lang==='en'?'Delete':'Удалить'}</button>
+            <button className="btn-sm" style={{marginTop:8,color:'var(--coral)',width:'100%'}} onClick={()=>{haptic('medium');setData(d=>({...d,contracts:(d.contracts||[]).filter(x=>x.id!==con.id)}))}}>{t.delete}</button>
           </div>
         ))}
         {showCon?(<div className="card fade-up" style={{padding:16,marginBottom:12}}>
           <div className="icon-row">{['🎓','🏥','🏠','✈️','🎯'].map(ic=><span key={ic} className={`icon-opt${selIcon===ic?' selected':''}`} onClick={()=>setSelIcon(ic)}>{ic}</span>)}</div>
-          <input className="glass-input" placeholder={data.lang==='en'?"University contract...":"Контракт универа…"} value={conE.name} onChange={e=>setConE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-          <FormattedInput placeholder={data.lang==='en'?"Total amount":"Общая сумма"} value={conE.totalAmount} onChange={v=>setConE(p=>({...p,totalAmount:v}))} style={{marginBottom:10}}/>
-          <div style={{fontSize:12,color:'var(--text2)',marginBottom:8}}>{data.lang==='en'?"Installments (% + due date)":"Взносы (% + срок оплаты)"}</div>
+          <input className="glass-input" placeholder={t.contractTitlePlace} value={conE.name} onChange={e=>setConE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+          <FormattedInput placeholder={t.contractTotalPlace} value={conE.totalAmount} onChange={v=>setConE(p=>({...p,totalAmount:v}))} style={{marginBottom:10}} lang={data.lang}/>
+          <div style={{fontSize:12,color:'var(--text2)',marginBottom:8}}>{t.contractInstallments}</div>
           {conE.installments.map((ins,i)=>(
             <div key={i} style={{display:'flex',gap:8,marginBottom:8,alignItems:'center'}}>
-              <FormattedInput placeholder="%" value={ins.percent} onChange={v=>setConE(p=>({...p,installments:p.installments.map((x,j)=>j===i?{...x,percent:parseFloat(v)||0}:x)}))} style={{width:70}}/>
+              <FormattedInput placeholder="%" value={ins.percent} onChange={v=>setConE(p=>({...p,installments:p.installments.map((x,j)=>j===i?{...x,percent:parseFloat(v)||0}:x)}))} style={{width:70}} lang={data.lang}/>
               <input className="glass-input" type="date" value={ins.dueDate} onChange={e=>setConE(p=>({...p,installments:p.installments.map((x,j)=>j===i?{...x,dueDate:e.target.value}:x)}))} style={{flex:1,colorScheme:'light'}}/>
               {i>0&&<button className="btn-sm" style={{color:'var(--coral)',padding:'8px'}} onClick={()=>setConE(p=>({...p,installments:p.installments.filter((_,j)=>j!==i)}))}>✕</button>}
             </div>
           ))}
-          <button className="btn-sm" style={{marginBottom:12,width:'100%'}} onClick={()=>setConE(p=>({...p,installments:[...p.installments,{percent:25,dueDate:''}]}))}>{data.lang==='en'?'+ Add installment':'+ Добавить взнос'}</button>
+          <button className="btn-sm" style={{marginBottom:12,width:'100%'}} onClick={()=>setConE(p=>({...p,installments:[...p.installments,{percent:25,dueDate:''}]}))}>{t.addInstallment}</button>
           <button className="btn-primary" onClick={saveCon}>{t.save}</button>
           <button className="btn-ghost" onClick={()=>setShowCon(false)}>{t.cancel}</button>
         </div>):(<button className="add-btn" onClick={()=>{haptic('light');setSelIcon('🎓');setShowCon(true);}}>{t.addContract}</button>)}
@@ -704,15 +753,15 @@ function SavingsPage({data,setData}){
   const [gForm,setGForm]=useState({name:'',target:'',monthly:''});
   const [selIcon,setSelIcon]=useState('🎯');
   const goalIcons=['🎯','📱','🚗','✈️','🏠','💍','👟','🎮','💻','🎓'];
-  const deposit=(amount,extras)=>{haptic('medium');notify('success');setData(d=>({...d,savingsBalance:(d.savingsBalance||0)+amount,savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'deposit',amount,note:extras?.name||'Пополнение'}]}));setAddSheet(false);};
-  const withdraw=(amount,extras)=>{haptic('medium');notify('success');setData(d=>({...d,savingsBalance:Math.max(0,(d.savingsBalance||0)-amount),savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'withdraw',amount,note:extras?.name||'Расход'}]}));setWdSheet(false);};
+  const deposit=(amount,extras)=>{haptic('medium');notify('success');setData(d=>({...d,savingsBalance:(d.savingsBalance||0)+amount,savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'deposit',amount,note:extras?.name||t.savingsHistoryDeposit}]}));setAddSheet(false);};
+  const withdraw=(amount,extras)=>{haptic('medium');notify('success');setData(d=>({...d,savingsBalance:Math.max(0,(d.savingsBalance||0)-amount),savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'withdraw',amount,note:extras?.name||t.savingsHistoryWithdraw}]}));setWdSheet(false);};
   const saveGoal=()=>{if(!gForm.name||!gForm.target)return;haptic('medium');setData(d=>({...d,savingsGoals:[...(d.savingsGoals||[]),{id:Date.now(),name:gForm.name,target:parseFloat(gForm.target),monthly:parseFloat(gForm.monthly)||0,saved:0,icon:selIcon}]}));setShowAdd(false);setGForm({name:'',target:'',monthly:''});};
   return(
     <div className="page">
       <div className="page-hdr fade-up"><h1>{t.savings} 🏦</h1></div>
       <div className="sav-balance-card fade-up d1">
         <div className="sav-label">{t.saved}</div>
-        <div className="sav-amount">{fmt(data.savingsBalance||0,data.currency)}</div>
+        <div className="sav-amount">{fmt(data.savingsBalance||0,data.currency,data.lang)}</div>
         <div style={{display:'flex',gap:10,marginTop:16}}>
           <button className="btn-sm" style={{background:'rgba(255,255,255,0.2)',color:'#fff',flex:1,padding:'10px',border:'1px solid rgba(255,255,255,0.3)'}} onClick={()=>setAddSheet(true)}>{t.deposit}</button>
           <button className="btn-sm" style={{background:'rgba(255,255,255,0.2)',color:'#fff',flex:1,padding:'10px',border:'1px solid rgba(255,255,255,0.3)'}} onClick={()=>setWdSheet(true)}>{t.withdraw}</button>
@@ -724,33 +773,33 @@ function SavingsPage({data,setData}){
           {[...(data.savingsHistory||[])].reverse().slice(0,20).map(h=>(
             <div className="sav-history-item" key={h.id}>
               <div className="shi-icon">{h.type==='deposit'?'📥':'📤'}</div>
-              <div className="shi-info"><div className="shi-note">{h.note}</div><div className="shi-date">{fmtDate(h.date)}</div></div>
-              <div className={`shi-amount ${h.type==='deposit'?'in':'out'}`}>{h.type==='deposit'?'+':'-'}{fmt(h.amount,data.currency)}</div>
+              <div className="shi-info"><div className="shi-note">{h.note}</div><div className="shi-date">{fmtDate(h.date, data.lang)}</div></div>
+              <div className={`shi-amount ${h.type==='deposit'?'in':'out'}`}>{h.type==='deposit'?'+':'-'}{fmt(h.amount,data.currency,data.lang)}</div>
             </div>
           ))}
         </div>
       </>}
-      <div className="sec-title fade-up d3">Цели накопления</div>
+      <div className="sec-title fade-up d3">{t.goals}</div>
       <div style={{padding:'0 20px'}}>
         {(data.savingsGoals||[]).map((g,i)=>{
           const pct=Math.min(100,Math.round(g.saved/g.target*100));
           return(<div className="card sav-goal-card fade-up" key={g.id} style={{animationDelay:i*0.06+'s'}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:4}}>
-              <div><div className="sav-goal-name">{g.icon} {g.name}</div><div className="sav-goal-sub">{fmt(g.saved,data.currency)} из {fmt(g.target,data.currency)}{g.monthly>0&&` · ${fmtShort(g.monthly)}/мес`}</div></div>
+              <div><div className="sav-goal-name">{g.icon} {g.name}</div><div className="sav-goal-sub">{fmt(g.saved,data.currency,data.lang)} {t.from} {fmt(g.target,data.currency,data.lang)}{g.monthly>0&&` · ${fmtShort(g.monthly, data.currency, data.lang)}/${t.mo}`}</div></div>
               <div style={{fontSize:20,fontWeight:900,color:'var(--blue)'}}>{pct}%</div>
             </div>
             <div className="pbar-wrap"><div className="pbar-fill" style={{width:pct+'%',background:'linear-gradient(90deg,var(--blue),var(--purple))'}}/></div>
             <div style={{display:'flex',gap:8,marginTop:10}}>
-              <button className="btn-sm" style={{background:'var(--green-soft)',color:'var(--green)',flex:1}} onClick={()=>{haptic('light');const amt=parseInt(prompt('Сколько отложить?'));if(amt>0)setData(d=>({...d,savingsBalance:Math.max(0,(d.savingsBalance||0)-amt),savingsGoals:(d.savingsGoals||[]).map(x=>x.id===g.id?{...x,saved:x.saved+amt}:x),savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'deposit',amount:amt,note:'→ '+g.name}]}));}}>Отложить</button>
+              <button className="btn-sm" style={{background:'var(--green-soft)',color:'var(--green)',flex:1}} onClick={()=>{haptic('light');const amt=parseInt(prompt(t.howMuchToSave));if(amt>0)setData(d=>({...d,savingsBalance:Math.max(0,(d.savingsBalance||0)-amt),savingsGoals:(d.savingsGoals||[]).map(x=>x.id===g.id?{...x,saved:x.saved+amt}:x),savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'deposit',amount:amt,note:'→ '+g.name}]}));}}>{t.saveGoalBtn}</button>
               <button className="btn-sm" style={{color:'var(--coral)'}} onClick={()=>{haptic('medium');setData(d=>({...d,savingsGoals:(d.savingsGoals||[]).filter(x=>x.id!==g.id)}))}}>✕</button>
             </div>
           </div>);
         })}
         {showAdd?(<div className="card fade-up" style={{padding:16,marginBottom:12}}>
           <div className="icon-row">{goalIcons.map(ic=><span key={ic} className={`icon-opt${selIcon===ic?' selected':''}`} onClick={()=>setSelIcon(ic)}>{ic}</span>)}</div>
-          <input className="glass-input" placeholder="iPhone 16, Машина…" value={gForm.name} onChange={e=>setGForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-          <FormattedInput placeholder={t.targetAmount} value={gForm.target} onChange={v=>setGForm(p=>({...p,target:v}))} style={{marginBottom:10}}/>
-          <FormattedInput placeholder={t.monthlyDeposit+' (необяз.)'} value={gForm.monthly} onChange={v=>setGForm(p=>({...p,monthly:v}))} style={{marginBottom:12}}/>
+          <input className="glass-input" placeholder={t.goalNamePlace} value={gForm.name} onChange={e=>setGForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+          <FormattedInput placeholder={t.targetAmount} value={gForm.target} onChange={v=>setGForm(p=>({...p,target:v}))} style={{marginBottom:10}} lang={data.lang}/>
+          <FormattedInput placeholder={t.monthlyDeposit+' '+t.optional} value={gForm.monthly} onChange={v=>setGForm(p=>({...p,monthly:v}))} style={{marginBottom:12}} lang={data.lang}/>
           <button className="btn-primary" onClick={saveGoal}>{t.save}</button>
           <button className="btn-ghost" onClick={()=>setShowAdd(false)}>{t.cancel}</button>
         </div>):(<button className="add-btn fade-up" onClick={()=>{haptic('light');setShowAdd(true);}}>{t.addGoal}</button>)}
@@ -783,20 +832,20 @@ function EventsPage({data,setData}){
             </div>
             <div className="ev-info" style={{flex:1}}>
               <div className="ev-name">{ev.name}</div>
-              <div className="ev-sub">{isPast?`${Math.abs(dl)} ${data.lang==='en'?'days ago':'дн. назад'}`:dl===0?`🎉 ${t.today}!`:dl===1?(data.lang==='en'?'Tomorrow!':'Завтра!'):dl>0?(data.lang==='en'?`In ${dl} days`:`Через ${dl} дн.`):''}</div>
+              <div className="ev-sub">{isPast?t.ago.replace('{n}',Math.abs(dl)):dl===0?`🎉 ${t.today}!`:dl===1?(data.lang==='en'?t.tomorrow:t.tomorrow):dl>0?t.inDays.replace('{n}',dl):''}</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:4}}>
-                {isW&&<span className="ev-badge week">⚡ {dl} дн.</span>}
-                {isM&&<span className="ev-badge month">📅 {dl} дн.</span>}
-                {ev.budget>0&&<span className="ev-badge budget">💰 {fmtShort(ev.budget)}</span>}
+                {isW&&<span className="ev-badge week">⚡ {dl} {t.days}</span>}
+                {isM&&<span className="ev-badge month">📅 {dl} {t.days}</span>}
+                {ev.budget>0&&<span className="ev-badge budget">💰 {fmtShort(ev.budget, data.currency, data.lang)}</span>}
               </div>
             </div>
             <button style={{background:'none',border:'none',color:'var(--text3)',fontSize:16,cursor:'pointer',padding:4}} onClick={()=>{haptic('medium');setData(d=>({...d,events:(d.events||[]).filter(x=>x.id!==ev.id)}))}}>✕</button>
           </div>);
         })}
         {showForm?(<div className="card fade-up" style={{padding:16,marginBottom:12}}>
-          <input className="glass-input" placeholder="Имя или название" value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+          <input className="glass-input" placeholder={t.eventName} value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
           <input className="glass-input" type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))} style={{marginBottom:10,colorScheme:'light'}}/>
-          <FormattedInput placeholder="Бюджет на подарок (необяз.)" value={form.budget} onChange={v=>setForm(p=>({...p,budget:v}))} style={{marginBottom:12}}/>
+          <FormattedInput placeholder={t.eventBudget} value={form.budget} onChange={v=>setForm(p=>({...p,budget:v}))} style={{marginBottom:12}} lang={data.lang}/>
           <button className="btn-primary" onClick={addEvent}>{t.confirm}</button>
           <button className="btn-ghost" onClick={()=>setShowForm(false)}>{t.cancel}</button>
         </div>):(<button className="add-btn fade-up" onClick={()=>{haptic('light');setShowForm(true);}}>{t.addEvent}</button>)}
@@ -821,10 +870,10 @@ function SettingsPage({data,setData}){
         body: JSON.stringify({user_name: uname, user_id: uid, text: feedbackText})
       });
     } catch(e) {}
-    alert('Спасибо за ваш отзыв! Мы обязательно его рассмотрим.');
+    alert(t.lang==='en'?'Thank you for your feedback! We will definitely consider it.':'Спасибо за ваш отзыв! Мы обязательно его рассмотрим.');
     setFeedbackText('');
   };
-  const resetAll=()=>{if(!window.confirm(data.lang==='en'?'Reset all data?':'Сбросить все данные?'))return;haptic('heavy');localStorage.clear();window.location.reload();};
+  const resetAll=()=>{if(!window.confirm(t.resetConfirm))return;haptic('heavy');localStorage.clear();window.location.reload();};
   return(
     <div className="page">
       <div className="page-hdr fade-up"><h1>⚙️ {t.settings}</h1></div>
@@ -861,22 +910,22 @@ function SettingsPage({data,setData}){
         <div className="settings-row">
           <div className="sr-icon">💰</div>
           <div className="sr-label">{t.salary}</div>
-          <FormattedInput value={data.salary} onChange={v=>setData(d=>({...d,salary:parseFloat(v)||0}))} style={{background:'none',border:'none',color:'var(--blue)',fontWeight:700,fontFamily:'inherit',fontSize:13,width:130,textAlign:'right',outline:'none'}}/>
+          <FormattedInput value={data.salary} onChange={v=>setData(d=>({...d,salary:parseFloat(v)||0}))} style={{background:'none',border:'none',color:'var(--blue)',fontWeight:700,fontFamily:'inherit',fontSize:13,width:130,textAlign:'right',outline:'none'}} lang={data.lang}/>
         </div>
         <div className="settings-row">
           <div className="sr-icon">📅</div>
-          <div className="sr-label">{data.lang==='en'?'Pay Day':'День зарплаты (1-31)'}</div>
+          <div className="sr-label">{t.paydaySett}</div>
           <input type="number" min="1" max="31" value={data.salaryDay} onChange={e=>setData(d=>({...d,salaryDay:parseInt(e.target.value)||1}))} style={{background:'none',border:'none',color:'var(--blue)',fontWeight:700,fontFamily:'inherit',fontSize:13,width:50,textAlign:'right',outline:'none'}}/>
         </div>
         <div className="settings-row">
           <div className="sr-icon">💹</div>
-          <div className="sr-label">{data.lang==='en'?'Auto-savings / month':'Авто-накопления / мес'}</div>
-          <FormattedInput value={data.monthlySavings||0} onChange={v=>setData(d=>({...d,monthlySavings:parseFloat(v)||0}))} style={{background:'none',border:'none',color:'var(--blue)',fontWeight:700,fontFamily:'inherit',fontSize:13,width:130,textAlign:'right',outline:'none'}}/>
+          <div className="sr-label">{t.autoSavingsMo}</div>
+          <FormattedInput value={data.monthlySavings||0} onChange={v=>setData(d=>({...d,monthlySavings:parseFloat(v)||0}))} style={{background:'none',border:'none',color:'var(--blue)',fontWeight:700,fontFamily:'inherit',fontSize:13,width:130,textAlign:'right',outline:'none'}} lang={data.lang}/>
         </div>
         <div className="settings-row">
           <div className="sr-icon">🏦</div>
-          <div className="sr-label">{data.lang==='en'?'Savings Balance':'Сумма накоплений'}</div>
-          <FormattedInput value={data.savingsBalance||0} onChange={v=>setData(d=>({...d,savingsBalance:parseFloat(v)||0}))} style={{background:'none',border:'none',color:'var(--blue)',fontWeight:700,fontFamily:'inherit',fontSize:13,width:130,textAlign:'right',outline:'none'}}/>
+          <div className="sr-label">{t.savingsBalance}</div>
+          <FormattedInput value={data.savingsBalance||0} onChange={v=>setData(d=>({...d,savingsBalance:parseFloat(v)||0}))} style={{background:'none',border:'none',color:'var(--blue)',fontWeight:700,fontFamily:'inherit',fontSize:13,width:130,textAlign:'right',outline:'none'}} lang={data.lang}/>
         </div>
       </div>
       <div className="sec-title fade-up d3">{t.feedback}</div>
@@ -889,7 +938,7 @@ function SettingsPage({data,setData}){
         <div className="settings-row">
           <div className="sr-icon">🔔</div>
           <div className="sr-label" style={{fontSize:13}}>{t.tgDesc1}</div>
-          <div style={{fontSize:11,color:'var(--green)',fontWeight:700}}>✓ {data.lang==='en'?'Auto':'Авто'}</div>
+          <div style={{fontSize:11,color:'var(--green)',fontWeight:700}}>✓ {t.auto}</div>
         </div>
         <div className="settings-row" style={{flexDirection:'column',alignItems:'flex-start',gap:6}}>
           <div style={{fontSize:12,color:'var(--text2)',lineHeight:1.6}}>
@@ -900,7 +949,7 @@ function SettingsPage({data,setData}){
           </div>
         </div>
         <div className="settings-row">
-          <button className="btn-sm" style={{width:'100%',background:'var(--accent-soft)',color:'var(--accent)',borderColor:'var(--accent)'}} onClick={()=>{haptic('medium');sendBotMsg(data.lang==='en'?'🔔 KeepIt: notifications are working! ✅':'🔔 KeepIt: тест уведомления работает! ✅');}}>
+          <button className="btn-sm" style={{width:'100%',background:'var(--accent-soft)',color:'var(--accent)',borderColor:'var(--accent)'}} onClick={()=>{haptic('medium');sendBotMsg(`🔔 KeepIt: ${t.tgTest.substring(2)} ✅`);}}>
             {t.tgTest}
           </button>
         </div>
@@ -913,12 +962,12 @@ function SettingsPage({data,setData}){
   );
 }
 
-  const NAV_ICONS={
+const NAV_ICONS={
   home:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>,
   budget:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1h-9a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h9zm-9-2h10V8H12v8zm4-2.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>,
   debts:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>,
   history:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 0 1 7-7 7 7 0 0 1 7 7 7 7 0 0 1-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 9-9 9 9 0 0 0-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>,
-  settings:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54a7.12 7.12 0 0 0-1.61.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.6l2.03 1.58a7.2 7.2 0 0 0-.07.94c0 .32.02.64.07.94L2.86 14.5c-.18.14-.23.41-.12.6l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.36 1.04.67 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54a7.12 7.12 0 0 0 1.61-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.6l-2.01-1.56zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>,
+  settings:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.61-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54a7.12 7.12 0 0 0-1.61.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.6l2.03 1.58a7.2 7.2 0 0 0-.07.94c0 .32.02.64.07.94L2.86 14.5c-.18.14-.23.41-.12.6l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.36 1.04.67 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54a7.12 7.12 0 0 0 1.61-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.6l-2.01-1.56zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>,
 };
 
 function DebtsPage({data,setData}){
@@ -929,7 +978,10 @@ function DebtsPage({data,setData}){
   const addDebt=()=>{
     if(!form.name||!form.amount)return;haptic('medium');
     const debt={id:Date.now(),name:form.name,amount:parseFloat(form.amount),type:form.type,note:form.note,dueDate:form.dueDate,paid:false,paidAmount:0,createdAt:new Date().toISOString()};
-    setData(d=>logActivity({...d,debts:[...(d.debts||[]),debt]},{type:'debt',label:form.type==='owe'?`Долг: ${form.name}`:`Дал в долг: ${form.name}`,amount:parseFloat(form.amount),color:'#c0392b'}));
+    setData(d=>{
+      notifyDebt(debt.name,debt.amount,debt.type,d.currency,d.lang);
+      return logActivity({...d,debts:[...(d.debts||[]),debt]},{type:'debt',label:form.type==='owe'?`${t.debtOweLog}${form.name}`:`${t.debtLentLog}${form.name}`,amount:parseFloat(form.amount),color:'#c0392b'});
+    });
     setShowForm(false);setForm({name:'',amount:'',type:'owe',note:'',dueDate:''});
   };
   const markPaid=(id)=>{
@@ -937,9 +989,10 @@ function DebtsPage({data,setData}){
     setData(d=>{
       const debt=(d.debts||[]).find(x=>x.id===id);
       const isInc=debt?.type==='owed';
+      notifyDebtPaid(debt?.name||'',debt?.amount||0,d.currency,d.lang);
       return logActivity(
         {...d,debts:(d.debts||[]).map(x=>x.id===id?{...x,paid:true,paidAmount:x.amount,paidAt:new Date().toISOString()}:x)},
-        {type:isInc?'income':'expense',label:`Долг закрыт: ${debt?.name||''}`,amount:(debt?.amount||0)-(debt?.paidAmount||0),color:isInc?'#2d7d46':'#c0392b'}
+        {type:isInc?'income':'expense',label:`${t.debtClosedLog}${debt?.name||''}`,amount:(debt?.amount||0)-(debt?.paidAmount||0),color:isInc?'#2d7d46':'#c0392b'}
       );
     });
   };
@@ -956,7 +1009,7 @@ function DebtsPage({data,setData}){
       const newPaid=(debt.paidAmount||0)+pay;
       const isPaid=newPaid>=debt.amount;
       const ndebts=(d.debts||[]).map(x=>x.id===partialId ? {...x, paidAmount:newPaid, paid:isPaid, paidAt:isPaid?new Date().toISOString():x.paidAt} : x);
-      const label = isPaid ? `Долг закрыт: ${debt.name}` : `Частично ${debt.type==='owe'?'вернули':'получили'}: ${debt.name}`;
+      const label = isPaid ? `${t.debtClosedLog}${debt.name}` : `${t.partially} ${debt.type==='owe'?t.debtReturnedLog:t.debtReceivedLog}: ${debt.name}`;
       return logActivity({...d, debts:ndebts},{type:isInc?'income':'expense',label,amount:pay,color:isInc?'#2d7d46':'#c0392b'});
     });
     setPartialId(null);
@@ -969,32 +1022,31 @@ function DebtsPage({data,setData}){
   return(
     <div className="page" style={{paddingBottom:80}}>
       <div className="page-hdr fade-up"><h1>💸 {t.debts}</h1></div>
-      {/* Summary */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,padding:'0 20px',marginBottom:14}}>
         <div className="card" style={{padding:14,textAlign:'center'}}>
           <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>{t.iOwe}</div>
-          <div style={{fontSize:18,fontWeight:800,color:'var(--coral)'}}>{fmtShort(totalOwe)}</div>
+          <div style={{fontSize:18,fontWeight:800,color:'var(--coral)'}}>{fmtShort(totalOwe, data.currency, data.lang)}</div>
           <div style={{fontSize:11,color:'var(--text3)'}}>{iOwe.length}</div>
         </div>
         <div className="card" style={{padding:14,textAlign:'center'}}>
           <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>{t.owedToMe}</div>
-          <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{fmtShort(totalOwed)}</div>
+          <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{fmtShort(totalOwed, data.currency, data.lang)}</div>
           <div style={{fontSize:11,color:'var(--text3)'}}>{owedToMe.length}</div>
         </div>
       </div>
       {iOwe.length>0&&<>
-        <div className="debt-section-hdr"><span>{t.iOwe}</span><span className="total" style={{color:'var(--coral)'}}>{fmt(totalOwe,data.currency)}</span></div>
+        <div className="debt-section-hdr"><span>{t.iOwe}</span><span className="total" style={{color:'var(--coral)'}}>{fmt(totalOwe,data.currency, data.lang)}</span></div>
         <div style={{padding:'0 20px'}}>
           {iOwe.map(d=>(
             <div className="debt-card" key={d.id}>
               <div className="debt-icon owe">💸</div>
               <div className="debt-info">
                 <div className="debt-name">{d.name}</div>
-                <div className="debt-meta">{d.note||''}{d.dueDate?` · ${data.lang==='en'?'Due':'До'} ${new Date(d.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'short'})}`:''}</div>
-                {d.paidAmount>0&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{data.lang==='en'?'Paid:':'Уже выплачено:'} {fmtShort(d.paidAmount)} / {fmtShort(d.amount)}</div>}
+                <div className="debt-meta">{d.note||''}{d.dueDate?` · ${t.due} ${new Date(d.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'short'})}`:''}</div>
+                {d.paidAmount>0&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{t.debtPaidAlready} {fmtShort(d.paidAmount, data.currency, data.lang)} / {fmtShort(d.amount, data.currency, data.lang)}</div>}
               </div>
               <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
-                <div className="debt-amount owe">-{fmt(d.amount-(d.paidAmount||0),data.currency)}</div>
+                <div className="debt-amount owe">-{fmt(d.amount-(d.paidAmount||0),data.currency, data.lang)}</div>
                 <div style={{display:'flex',gap:6}}>
                   <button className="debt-paid" style={{background:'var(--surface2)',color:'var(--text2)',padding:'6px 10px'}} onClick={()=>{haptic('light');setPartialId(d.id);}}>{t.paidPart}</button>
                   <button className="debt-paid" style={{padding:'6px 10px'}} onClick={()=>markPaid(d.id)}>{t.paidAll}</button>
@@ -1005,18 +1057,18 @@ function DebtsPage({data,setData}){
         </div>
       </>}
       {owedToMe.length>0&&<>
-        <div className="debt-section-hdr" style={{marginTop:8}}><span>{t.owedToMe}</span><span className="total" style={{color:'var(--green)'}}>{fmt(totalOwed,data.currency)}</span></div>
+        <div className="debt-section-hdr" style={{marginTop:8}}><span>{t.owedToMe}</span><span className="total" style={{color:'var(--green)'}}>{fmt(totalOwed,data.currency, data.lang)}</span></div>
         <div style={{padding:'0 20px'}}>
           {owedToMe.map(d=>(
             <div className="debt-card" key={d.id}>
               <div className="debt-icon owed">🤝</div>
               <div className="debt-info">
                 <div className="debt-name">{d.name}</div>
-                <div className="debt-meta">{d.note||''}{d.dueDate?` · ${data.lang==='en'?'Due':'До'} ${new Date(d.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'short'})}`:''}</div>
-                {d.paidAmount>0&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{data.lang==='en'?'Returned:':'Уже вернули:'} {fmtShort(d.paidAmount)} / {fmtShort(d.amount)}</div>}
+                <div className="debt-meta">{d.note||''}{d.dueDate?` · ${t.due} ${new Date(d.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'short'})}`:''}</div>
+                {d.paidAmount>0&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{t.debtReturnedAlready} {fmtShort(d.paidAmount, data.currency, data.lang)} / {fmtShort(d.amount, data.currency, data.lang)}</div>}
               </div>
               <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
-                <div className="debt-amount owed">+{fmt(d.amount-(d.paidAmount||0),data.currency)}</div>
+                <div className="debt-amount owed">+{fmt(d.amount-(d.paidAmount||0),data.currency, data.lang)}</div>
                 <div style={{display:'flex',gap:6}}>
                   <button className="debt-paid" style={{background:'var(--surface2)',color:'var(--text2)',padding:'6px 10px'}} onClick={()=>{haptic('light');setPartialId(d.id);}}>{t.paidPart}</button>
                   <button className="debt-paid" style={{padding:'6px 10px'}} onClick={()=>markPaid(d.id)}>{t.paidAll}</button>
@@ -1035,7 +1087,7 @@ function DebtsPage({data,setData}){
               ))}
             </div>
             <input className="glass-input" placeholder={t.debtName} value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-            <FormattedInput placeholder={`${t.debtAmount} (${data.currency})`} value={form.amount} onChange={v=>setForm(p=>({...p,amount:v}))} style={{marginBottom:10,background:'none',border:'1px solid var(--border)',padding:'10px',borderRadius:8,width:'100%',boxSizing:'border-box'}}/>
+            <FormattedInput placeholder={`${t.debtAmount} (${data.currency})`} value={form.amount} onChange={v=>setForm(p=>({...p,amount:v}))} style={{marginBottom:10,background:'none',border:'1px solid var(--border)',padding:'10px',borderRadius:8,width:'100%',boxSizing:'border-box'}} lang={data.lang}/>
             <input className="glass-input" placeholder={t.debtNote} value={form.note} onChange={e=>setForm(p=>({...p,note:e.target.value}))} style={{marginBottom:10}}/>
             <input className="glass-input" type="date" value={form.dueDate} onChange={e=>setForm(p=>({...p,dueDate:e.target.value}))} style={{marginBottom:12,colorScheme:'light'}}/>
             <button className="btn-primary" onClick={addDebt}>{t.addDebt.substring(2)}</button>
@@ -1046,7 +1098,7 @@ function DebtsPage({data,setData}){
         )}
       </div>
       {paid.length>0&&<>
-        <div className="sec-title" style={{marginTop:8}}>✅ {data.lang==='en'?'Closed':'Закрытые'}</div>
+        <div className="sec-title" style={{marginTop:8}}>✅ {t.closed}</div>
         <div style={{padding:'0 20px',marginBottom:16}}>
           {paid.map(d=>(
             <div className="debt-card" key={d.id} style={{opacity:.6}}>
@@ -1059,7 +1111,7 @@ function DebtsPage({data,setData}){
       </>}
       {partialId && (
         <NumPadSheet 
-          title="Частичная оплата" 
+          title={t.partially} 
           currency={data.currency} 
           onClose={()=>setPartialId(null)} 
           onConfirm={handlePartial} 
@@ -1079,9 +1131,9 @@ function HistoryPage({data,setData}){
 
   const downloadCSV = () => {
     haptic('light');
-    let csv = "Дата,Операция,Категория,Сумма\n";
+    let csv = `${t.today},${t.historyOp},${t.addCategory.substring(2)},${t.debtAmount}\n`;
     filteredItems.forEach(i => {
-      csv += `${fmtDate(i.date)},"${i.name}","${i.sub}",${i.amount}\n`;
+      csv += `${fmtDate(i.date, data.lang)},"${i.name}","${i.sub}",${Math.abs(i.amount).toFixed(0)}\n`;
     });
     const blob = new Blob(["\uFEFF"+csv], {type: 'text/csv;charset=utf-8;'});
     const url = URL.createObjectURL(blob);
@@ -1105,10 +1157,10 @@ function HistoryPage({data,setData}){
   if (data.userType !== 'student' && data.salary > 0 && vElapsed >= data.salaryDay) {
     const hasLog = (data.activityLog||[]).some(a=>{
       const ad = new Date(a.date);
-      return ad.getMonth()===m && ad.getFullYear()===y && a.label.includes('Зарплата');
+      return ad.getMonth()===m && ad.getFullYear()===y && (a.label.includes('Зарплата') || a.label.includes('Salary'));
     });
     if(!hasLog) {
-      items.push({id:'v_salary',icon:'💰',name:'Зарплата',sub:'Авто-начисление',amount:data.salary,color:'#2d7d46',date:new Date(y,m,data.salaryDay,9,0).toISOString()});
+      items.push({id:'v_salary',icon:'💰',name:t.salaryLog,sub:t.auto,amount:data.salary,color:'#2d7d46',date:new Date(y,m,data.salaryDay,9,0).toISOString()});
     }
   }
 
@@ -1121,33 +1173,33 @@ function HistoryPage({data,setData}){
       if (c.type === 'workday') s = (c.dailyAmount||0)*vWdElapsed;
       else s = (c.monthlyLimit/vTotal)*vElapsed;
     }
-    if(s>0) items.push({id:'cat_'+c.id,icon:c.icon,name:c.name,sub:c.deductType==='upfront'?'Сразу за месяц':'Авто-расход (накоплено)',amount:-s,color:'#c0392b',date:new Date(y,m,Math.max(1,vElapsed)).toISOString()});
+    if(s>0) items.push({id:'cat_'+c.id,icon:c.icon,name:c.name,sub:c.deductType==='upfront'?t.immediatelyMonth:t.autoExpenseAccum,amount:-s,color:'#c0392b',date:new Date(y,m,Math.max(1,vElapsed)).toISOString()});
   });
   // Fixed expenses paid this month
   (data.fixedExpenses||[]).filter(fe=>fe.day<=vElapsed).forEach(fe=>{
-    items.push({id:'fe_'+fe.id,icon:fe.icon,name:fe.name,sub:`Подписка · ${fe.day}-го`,amount:-fe.amount,color:'#c0392b',date:new Date(y,m,fe.day,10,0).toISOString()});
+    items.push({id:'fe_'+fe.id,icon:fe.icon,name:fe.name,sub:`${t.subscription} · ${fe.day}-го`,amount:-fe.amount,color:'#c0392b',date:new Date(y,m,fe.day,10,0).toISOString()});
   });
   // Big expenses this month
   (data.bigExpenses||[]).filter(be=>{const bd=new Date(be.date);return bd.getMonth()===m&&bd.getFullYear()===y;}).forEach(be=>{
-    items.push({id:'be_'+be.id,icon:be.icon,name:be.name,sub:be.fromSavings?'Из накоплений':'Расход',amount:-be.amount,color:be.fromSavings?'#2563eb':'#c0392b',date:be.date});
+    items.push({id:'be_'+be.id,icon:be.icon,name:be.name,sub:be.fromSavings?t.fromSavings:t.expenses.substring(0,t.expenses.length-1),amount:-be.amount,color:be.fromSavings?'#2563eb':'#c0392b',date:be.date});
   });
   // Savings history this month
   (data.savingsHistory||[]).filter(h=>{const hd=new Date(h.date);return hd.getMonth()===m&&hd.getFullYear()===y;}).forEach(h=>{
     const isDup = (data.bigExpenses||[]).some(b => b.fromSavings && b.date === h.date);
     if (!isDup) {
-      items.push({id:'sh_'+h.id,icon:h.type==='deposit'?'📥':'📤',name:h.note||'Накопления',sub:'Копилка',amount:h.type==='deposit'?-h.amount:h.amount,color:h.type==='deposit'?'#2d7d46':'#c0392b',date:h.date});
+      items.push({id:'sh_'+h.id,icon:h.type==='deposit'?'📥':'📤',name:h.note||t.savings,sub:t.savings,amount:h.type==='deposit'?-h.amount:h.amount,color:h.type==='deposit'?'#2d7d46':'#c0392b',date:h.date});
     }
   });
   // Debts this month
   (data.debts||[]).filter(d=>{const dd=new Date(d.createdAt);return dd.getMonth()===m&&dd.getFullYear()===y;}).forEach(d=>{
-    items.push({id:'debt_'+d.id,icon:d.type==='owe'?'💸':'🤝',name:d.name,sub:d.type==='owe'?'Я должен':'Мне должны',amount:d.type==='owe'?-d.amount:d.amount,color:d.type==='owe'?'#c0392b':'#2d7d46',date:d.createdAt});
+    items.push({id:'debt_'+d.id,icon:d.type==='owe'?'💸':'🤝',name:d.name,sub:d.type==='owe'?t.iOwe:t.owedToMe,amount:d.type==='owe'?-d.amount:d.amount,color:d.type==='owe'?'#c0392b':'#2d7d46',date:d.createdAt});
   });
   // Activity log
   (data.activityLog||[]).filter(a=>{const ad=new Date(a.date);return ad.getMonth()===m&&ad.getFullYear()===y;}).forEach(a=>{
     if (a.type !== 'expense') {
       if(!items.find(i=>i.id==='act_'+a.id)) {
-        const isInc = a.type === 'income' || (a.type === 'debt_paid' && a.label.includes('получили'));
-        items.push({id:'act_'+a.id,icon:'📋',name:a.label,sub:'Операция',amount:a.amount ? (isInc ? a.amount : -a.amount) : 0,color:a.color||'#6e6a65',date:a.date});
+        const isInc = a.type === 'income' || (a.type === 'debt_paid' && (a.label.includes(t.debtReturnedLog) || a.label.includes(t.debtReceivedLog)));
+        items.push({id:'act_'+a.id,icon:'📋',name:a.label,sub:t.historyOp,amount:a.amount ? (isInc ? a.amount : -a.amount) : 0,color:a.color||'#6e6a65',date:a.date});
       }
     }
   });
@@ -1194,11 +1246,11 @@ function HistoryPage({data,setData}){
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,padding:'0 20px',marginBottom:14}}>
         <div className="card" style={{padding:14,textAlign:'center'}}>
           <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>{t.expenses}</div>
-          <div style={{fontSize:18,fontWeight:800,color:'var(--coral)'}}>{fmtShort(totalOut)}</div>
+          <div style={{fontSize:18,fontWeight:800,color:'var(--coral)'}}>{fmtShort(totalOut, data.currency, data.lang)}</div>
         </div>
         <div className="card" style={{padding:14,textAlign:'center'}}>
           <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>{t.income}</div>
-          <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{fmtShort(totalIn)}</div>
+          <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{fmtShort(totalIn, data.currency, data.lang)}</div>
         </div>
       </div>
       
@@ -1227,7 +1279,7 @@ function HistoryPage({data,setData}){
                   <div className="hi-name">{item.icon} {item.name}</div>
                   <div className="hi-sub">{item.sub}</div>
                 </div>
-                <div className="hi-amount" style={{color:item.amount>=0?'var(--green)':'var(--coral)'}}>{item.amount>=0?'+':''}{fmtShort(Math.abs(item.amount))}</div>
+                <div className="hi-amount" style={{color:item.amount>=0?'var(--green)':'var(--coral)'}}>{item.amount>=0?'+':''}{fmtShort(Math.abs(item.amount), data.currency, data.lang)}</div>
               </div>
             ))}
           </div>
@@ -1287,12 +1339,12 @@ function App(){
   const NAV=[
     {id:'home',label:t.home},
     {id:'budget',label:t.budget},
-    {id:'debts',label:'Долги'},
+    {id:'debts',label:t.debts},
     {id:'savings',label:t.savings},
-    {id:'history',label:'История'},
+    {id:'history',label:t.history},
     {id:'settings',label:t.settings},
   ];
-  if(!isReady) return <div style={{height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text2)',fontSize:14}}>Загрузка...</div>;
+  if(!isReady) return <div style={{height:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text2)',fontSize:14}}>{t.loading}</div>;
   return(<>
     {!onboarded&&<Onboarding onDone={handleOnboard}/>}
     {tab==='home'&&<Dashboard data={data} setData={setData}/>}
