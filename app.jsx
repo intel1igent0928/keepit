@@ -694,7 +694,7 @@ function BudgetPage({data,setData}){
               <button className="btn-primary" onClick={saveFix}>{t.save}</button><button className="btn-ghost" onClick={()=>{setShowFF(false);setFixE({id:'',name:'',amount:'',day:'1'});}}>{t.cancel}</button>
             </div>
           ) : (
-            <div className="fixed-tile" key={fe.id} style={{cursor:'pointer'}} onClick={()=>{setFixE({id:fe.id,name:fe.name,amount:fe.amount,day:fe.day});setSelIcon(fe.icon);setShowFF(true);}}><div className="ft-icon">{fe.icon}</div><div className="ft-info"><div className="ft-name">{fe.name}</div><div className="ft-day">{fmt(fe.amount,data.currency,data.lang)} · {fe.day}-го</div></div><button className="btn-sm" style={{color:'var(--coral)'}} onClick={(e)=>{e.stopPropagation();haptic('medium');setData(d=>({...d,fixedExpenses:(d.fixedExpenses||[]).filter(x=>x.id!==fe.id)}))}}>✕</button></div>
+            <div className="fixed-tile" key={fe.id} style={{cursor:'pointer'}} onClick={()=>{setFixE({id:fe.id,name:fe.name,amount:fe.amount,day:fe.day});setSelIcon(fe.icon);setShowFF(true);}}><div className="ft-icon">{fe.icon}</div><div className="ft-info"><div className="ft-name">{fe.name}</div><div className="ft-day">{fmt(fe.amount,data.currency,data.lang)} · {fe.day} {t.mo}</div></div><button className="btn-sm" style={{color:'var(--coral)'}} onClick={(e)=>{e.stopPropagation();haptic('medium');setData(d=>({...d,fixedExpenses:(d.fixedExpenses||[]).filter(x=>x.id!==fe.id)}))}}>✕</button></div>
           )
         ))}
         {showFF && !fixE.id ? (
@@ -1103,8 +1103,8 @@ function DebtsPage({data,setData}){
           {paid.map(d=>(
             <div className="debt-card" key={d.id} style={{opacity:.6}}>
               <div className="debt-icon" style={{background:'var(--border)'}}>{d.type==='owe'?'💸':'🤝'}</div>
-              <div className="debt-info"><div className="debt-name" style={{textDecoration:'line-through'}}>{d.name}</div><div className="debt-meta">{d.paidAt?'Закрыт '+fmtDate(d.paidAt):''}</div></div>
-              <div className="debt-amount" style={{color:'var(--text3)'}}>{fmt(d.amount,data.currency)}</div>
+              <div className="debt-info"><div className="debt-name" style={{textDecoration:'line-through'}}>{d.name}</div><div className="debt-meta">{d.paidAt?`${t.done} ${fmtDate(d.paidAt, data.lang)}`:''}</div></div>
+              <div className="debt-amount" style={{color:'var(--text3)'}}>{fmt(d.amount,data.currency, data.lang)}</div>
             </div>
           ))}
         </div>
@@ -1123,6 +1123,7 @@ function DebtsPage({data,setData}){
 }
 
 function HistoryPage({data,setData}){
+  const t=T[data.lang||'ru'];
   const now=todayDate();
   const [viewDate, setViewDate] = useState(()=>new Date(now.getFullYear(), now.getMonth(), 1));
   const m=viewDate.getMonth(), y=viewDate.getFullYear();
