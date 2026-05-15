@@ -4,10 +4,10 @@ const haptic = (t='light') => tg?.HapticFeedback?.impactOccurred?.(t);
 const notify  = (t='success') => tg?.HapticFeedback?.notificationOccurred?.(t);
 const save = (k,v) => { 
   const str = JSON.stringify(v);
-  localStorage.setItem('ki_'+k, str); 
-  try { if(tg?.CloudStorage) tg.CloudStorage.setItem('ki_'+k, str); } catch(e){}
+  localStorage.setItem('k2_'+k, str); 
+  try { if(tg?.CloudStorage) tg.CloudStorage.setItem('k2_'+k, str); } catch(e){}
 };
-const load = (k,d) => { try { const r=localStorage.getItem('ki_'+k); return r?JSON.parse(r):d; } catch{return d;} };
+const load = (k,d) => { try { const r=localStorage.getItem('k2_'+k); return r?JSON.parse(r):d; } catch{return d;} };
 
 const CURRENCIES = ['UZS','KGS','USD','EUR','RUB','KZT'];
 const ICONS = ['🍔','🚕','💪','🏠','💊','📚','🎮','✈️','👔','🎁','🛒','⚡','🌐','🎵','🎓','🏦'];
@@ -57,9 +57,7 @@ const DEFAULT_DATA = {
   userType:'worker',
   pocketMoney:0,
   incomeEntries:[],
-  categories:[
-    {id:'daily',name:'Обед + транспорт',icon:'🍽️',type:'workday',dailyAmount:50000,daysPerWeek:5,color:'#c0392b'},
-  ],
+  categories:[],
   fixedExpenses:[], bigExpenses:[], contracts:[],
   debts:[],
   savingsBalance:0, savingsGoals:[], savingsHistory:[],
@@ -505,8 +503,8 @@ function Dashboard({data,setData}){
         )}
       </div>
 
-      {sheet&&<NumPadSheet title="\ud83d\udcb8 \u041a\u0440\u0443\u043f\u043d\u044b\u0439 \u0440\u0430\u0441\u0445\u043e\u0434" currency={data.currency} onClose={()=>setSheet(null)} onConfirm={addBig} showSavings showName lang={data.lang}/>}
-      {incomeSheet&&<NumPadSheet title="\u2795 \u0414\u043e\u043f. \u0434\u043e\u0445\u043e\u0434" currency={data.currency} onClose={()=>setIncomeSheet(false)} onConfirm={addIncome} showName lang={data.lang}/>}
+      {sheet&&<NumPadSheet title={data.lang==='en'?'💸 Large Expense':'💸 Крупный расход'} currency={data.currency} onClose={()=>setSheet(null)} onConfirm={addBig} showSavings showName lang={data.lang}/>}
+      {incomeSheet&&<NumPadSheet title={data.lang==='en'?'➕ Extra Income':'➕ Доп. доход'} currency={data.currency} onClose={()=>setIncomeSheet(false)} onConfirm={addIncome} showName lang={data.lang}/>}
       {chip&&<FlyChip text={chip} onDone={()=>setChip(null)}/>}
     </div>
   );
@@ -1190,28 +1188,28 @@ function App(){
     if (tg?.CloudStorage) {
       try {
         tg.CloudStorage.getKeys((err, keys) => {
-          if (!err && keys && keys.includes('ki_data')) {
-            tg.CloudStorage.getItem('ki_data', (e, v) => {
+          if (!err && keys && keys.includes('k2_data')) {
+            tg.CloudStorage.getItem('k2_data', (e, v) => {
               if (!e && v) {
                 try {
                   const cloudData = JSON.parse(v);
                   setDataRaw(prev => ({...prev, ...cloudData}));
-                  localStorage.setItem('ki_data', v);
+                  localStorage.setItem('k2_data', v);
                 } catch(err){}
               }
-              tg.CloudStorage.getItem('ki_onboarded', (e2, v2) => {
+              tg.CloudStorage.getItem('k2_onboarded', (e2, v2) => {
                  if(!e2 && v2 === 'true') {
                    setOnboarded(true);
-                   localStorage.setItem('ki_onboarded', 'true');
+                   localStorage.setItem('k2_onboarded', 'true');
                  }
                  setIsReady(true);
               });
             });
           } else {
-            const loc = localStorage.getItem('ki_data');
+            const loc = localStorage.getItem('k2_data');
             if (loc) {
-              try { tg.CloudStorage.setItem('ki_data', loc); } catch(e){}
-              try { tg.CloudStorage.setItem('ki_onboarded', localStorage.getItem('ki_onboarded')||'false'); } catch(e){}
+              try { tg.CloudStorage.setItem('k2_data', loc); } catch(e){}
+              try { tg.CloudStorage.setItem('k2_onboarded', localStorage.getItem('k2_onboarded')||'false'); } catch(e){}
             }
             setIsReady(true);
           }
