@@ -134,4 +134,34 @@ async def telegram_webhook(req: Request):
         except Exception as e:
             print("Error parsing web_app_data:", e)
             
+    if "text" in message and message["text"].startswith("/start"):
+        user_id = message.get("from", {}).get("id")
+        user_lang = message.get("from", {}).get("language_code", "en")
+        
+        if user_lang and user_lang.startswith("ru"):
+            text = (
+                "👋 <b>Добро пожаловать в KeepIt!</b>\n\n"
+                "Я — ваш умный финансовый помощник. 💰\n\n"
+                "🚀 <b>Что я умею:</b>\n"
+                "• Распределять бюджет до копейки\n"
+                "• Автоматически копить деньги 🏦\n"
+                "• Напоминать о долгах и подписках 🤝\n"
+                "• Планировать важные события 🎉\n\n"
+                "👇 Нажмите кнопку <b>«Открыть / Open»</b> внизу, чтобы начать работу!"
+            )
+        else:
+            text = (
+                "👋 <b>Welcome to KeepIt!</b>\n\n"
+                "I am your smart financial assistant. 💰\n\n"
+                "🚀 <b>What I can do:</b>\n"
+                "• Calculate your daily budget\n"
+                "• Automatically save your money 🏦\n"
+                "• Track and remind you about debts 🤝\n"
+                "• Plan future events and expenses 🎉\n\n"
+                "👇 Click the <b>«Open»</b> button below to get started!"
+            )
+            
+        if user_id:
+            await send_notification(NotifyRequest(tg_user_id=user_id, text=text))
+
     return {"ok": True}

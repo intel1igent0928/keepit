@@ -177,6 +177,18 @@ function Onboarding({onDone}){
         <span className="ob-emoji">👋</span>
         <h2>Привет! Я KeepIt</h2>
         <p>Умный финансовый помощник. Как ты получаешь деньги?</p>
+        
+        <div style={{display:'flex', gap:10, marginBottom: 20}}>
+          <select className="glass-input" value={d.lang||'ru'} onChange={e=>{upd('lang',e.target.value);}} style={{flex:1}}>
+            <option value="ru" style={{color:'#000'}}>🇷🇺 Русский</option>
+            <option value="en" style={{color:'#000'}}>🇬🇧 English</option>
+          </select>
+          <select className="glass-input" value={d.theme||'light'} onChange={e=>{upd('theme',e.target.value); document.documentElement.setAttribute('data-theme',e.target.value);}} style={{flex:1}}>
+            <option value="light" style={{color:'#000'}}>☀️ Светлая</option>
+            <option value="dark" style={{color:'#000'}}>🌙 Тёмная</option>
+          </select>
+        </div>
+
         <button className="btn-primary" style={{background:'linear-gradient(135deg,#d4773c,#c05e20)',marginBottom:12}} onClick={()=>{haptic('medium');setUserType('worker');}}>
           💼 Я работаю — есть зарплата
         </button>
@@ -206,7 +218,7 @@ function Onboarding({onDone}){
           <FormattedInput placeholder="50 000" value={d.dailyAmount} onChange={v=>upd('dailyAmount',v)}/>
           <span className="input-suffix">{d.currency} / день</span>
         </div>
-        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>≈ {fmtShort(parseFloat(d.dailyAmount||0)*22)} {d.currency} в месяц (22 раб. дня)</div>
+        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>≈ {fmtShort((parseFloat(String(d.dailyAmount).replace(/\s/g,''))||0)*22)} {d.currency} в месяц (22 раб. дня)</div>
       </div>
     )},
     {emoji:'💹',title:'Авто-накопления',sub:'Сколько с каждой зарплаты откладывать в накопления?',content:(
