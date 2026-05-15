@@ -27,25 +27,69 @@ const T = {
        available:'Доступно', spent:'Потрачено', saved:'Накоплено', contracts:'Контракты',
        addCategory:'+ Добавить категорию', addSubscription:'+ Добавить подписку',
        addContract:'+ Добавить контракт', addGoal:'+ Добавить цель', addEvent:'+ Добавить событие',
-       addBigExpense:'+ Добавить крупный расход', deposit:'+ Пополнить', withdraw:'− Потратить',
+       addBigExpense:'+ Добавить крупный расход', deposit:'Пополнить', withdraw:'Потратить',
        cancel:'Отмена', save:'Сохранить', reset:'Сбросить данные', confirm:'Подтвердить',
        received:'Получили зарплату?', today:'Сегодня', done:'Готово ✓', theme:'Тема',
        language:'Язык', currency:'Валюта', dark:'Тёмная', light:'Светлая',
        salaryDay:'День зарплаты', goalName:'Название цели', targetAmount:'Целевая сумма',
        monthlyDeposit:'Откладывать в месяц', fromSavings:'Из накоплений 🏦',
-       bigExpenseTitle:'Название расхода', history:'История', noHistory:'Пока нет операций' },
+       bigExpenseTitle:'Название расхода', history:'История', noHistory:'Пока нет операций',
+       nearestEvents:'Ближайшие события', noEvents:'Нет ближайших событий', eventName:'Имя или название', eventBudget:'Бюджет на подарок (необяз.)',
+       debts:'Долги', iOwe:'Я должен', owedToMe:'Мне должны', addDebt:'+ Добавить долг',
+       debtName:'Имя (Алишер, Ваня…)', debtAmount:'Сумма', debtNote:'Примечание (необяз.)',
+       paidPart:'Частями', paidAll:'✓ Все', income:'Поступления', expenses:'Расходы', all:'Все', downloadCSV:'📥 Скачать CSV',
+       yesterday:'Вчера', goals:'Цели', feedback:'💡 Идеи и Жалобы', feedbackPlaceholder:'Напишите вашу идею, жалобу или предложение...',
+       feedbackSubmit:'📤 Отправить', tgNotifications:'🤖 Telegram уведомления', tgDesc1:'Уведомления через бота',
+       tgDesc2:'Настроено автоматически. Уведомления приходят когда:', tgTest:'🔔 Отправить тест',
+       helloTitle:'Привет! Я KeepIt', helloSub:'Умный финансовый помощник. Как ты получаешь деньги?',
+       workerBtn:'💼 Я работаю — есть зарплата', studentBtn:'🎓 Я студент / получаю от родителей',
+       yourSalary:'Твоя зарплата', yourSalarySub:'Сколько получаешь и в какой день месяца?',
+       salaryDayPlace:'День выплаты (напр. 25)', dailyBudget:'Дневной бюджет', dailyBudgetSub:'Ты работаешь 5 дней в неделю. Сколько в день на обед + транспорт?',
+       saveAuto:'Авто-накопление', saveAutoSub:'Остаток от зарплаты вычесть в копилку автоматически при получении?',
+       saveTarget:'Цель накопления', saveTargetSub:'Если уже есть сбережения — введи сумму. (Можно 0)',
+       pocketMoney:'Карманные деньги', pocketMoneySub:'Сколько сейчас есть на руках и на сколько дней они рассчитаны?',
+       pocketDays:'На сколько дней? (например: 7)', pocketAddLater:'Когда дадут ещё — добавишь в приложении ✓',
+       studentDailySub:'Сколько в день на обед и дорогу?',
+       continue:'Продолжить →', letsGo:'Поехали! 🚀', skip:'Пропустить', back:'← Назад',
+       salaryConfirmed:'✅ Да, поступила!', salaryNotYet:'⏰ Ещё нет', salaryOfDate:'Зарплата',
+       youCanSpend:'Сегодня можно потратить', daysLeftOf:'дн. из', daysUntilSalary:'дн. до зарплаты',
+       vsLastMonth:'Сравнение с прошлым месяцем', largeExpenses:'Крупные расходы', noLargeExpenses:'Нет крупных трат в этом месяце',
+       extraIncomeBtn:'➕ Доп. доход', studentExtraBtn:'➕ Родители дали деньги / Доп. доход'
+     },
   en:{ home:'Home', budget:'Budget', savings:'Savings', events:'Events', settings:'Settings',
        salary:'Salary', payday:'Pay Day', autoExpenses:'Auto Expenses', subscriptions:'Subscriptions',
        available:'Available', spent:'Spent', saved:'Saved', contracts:'Contracts',
        addCategory:'+ Add Category', addSubscription:'+ Add Subscription',
        addContract:'+ Add Contract', addGoal:'+ Add Goal', addEvent:'+ Add Event',
-       addBigExpense:'+ Add Large Expense', deposit:'+ Deposit', withdraw:'− Withdraw',
+       addBigExpense:'+ Add Large Expense', deposit:'Deposit', withdraw:'Withdraw',
        cancel:'Cancel', save:'Save', reset:'Reset Data', confirm:'Confirm',
        received:'Did you get paid?', today:'Today', done:'Done ✓', theme:'Theme',
        language:'Language', currency:'Currency', dark:'Dark', light:'Light',
        salaryDay:'Pay Day', goalName:'Goal Name', targetAmount:'Target Amount',
        monthlyDeposit:'Monthly Deposit', fromSavings:'From Savings 🏦',
-       bigExpenseTitle:'Expense Title', history:'History', noHistory:'No transactions yet' },
+       bigExpenseTitle:'Expense Title', history:'History', noHistory:'No transactions yet',
+       nearestEvents:'Upcoming Events', noEvents:'No upcoming events', eventName:'Name or title', eventBudget:'Gift budget (optional)',
+       debts:'Debts', iOwe:'I owe', owedToMe:'Owed to me', addDebt:'+ Add Debt',
+       debtName:'Name (John, Alex…)', debtAmount:'Amount', debtNote:'Note (optional)',
+       paidPart:'Partial', paidAll:'✓ All', income:'Income', expenses:'Expenses', all:'All', downloadCSV:'📥 Download CSV',
+       yesterday:'Yesterday', goals:'Goals', feedback:'💡 Ideas & Feedback', feedbackPlaceholder:'Write your idea, complaint, or suggestion...',
+       feedbackSubmit:'📤 Submit', tgNotifications:'🤖 Telegram Notifications', tgDesc1:'Bot notifications',
+       tgDesc2:'Configured automatically. Notifications are sent when you:', tgTest:'🔔 Send test',
+       helloTitle:'Hi! I am KeepIt', helloSub:'Smart financial assistant. How do you earn money?',
+       workerBtn:'💼 I work — I get a salary', studentBtn:'🎓 I am a student / I get allowance',
+       yourSalary:'Your Salary', yourSalarySub:'How much do you get and what day of the month?',
+       salaryDayPlace:'Pay day (e.g., 25)', dailyBudget:'Daily Budget', dailyBudgetSub:'You work 5 days a week. How much per day for lunch + transport?',
+       saveAuto:'Auto-savings', saveAutoSub:'Automatically deduct the remainder of your salary to savings when received?',
+       saveTarget:'Savings Goal', saveTargetSub:'If you already have savings — enter the amount. (Can be 0)',
+       pocketMoney:'Pocket Money', pocketMoneySub:'How much do you have on hand and how many days is it for?',
+       pocketDays:'For how many days? (e.g. 7)', pocketAddLater:'You can add more later in the app ✓',
+       studentDailySub:'How much per day for lunch and transport?',
+       continue:'Continue →', letsGo:'Let\'s go! 🚀', skip:'Skip', back:'← Back',
+       salaryConfirmed:'✅ Yes, received!', salaryNotYet:'⏰ Not yet', salaryOfDate:'Salary',
+       youCanSpend:'You can spend today', daysLeftOf:'days left of', daysUntilSalary:'days until salary',
+       vsLastMonth:'vs last month', largeExpenses:'Large Expenses', noLargeExpenses:'No large expenses this month',
+       extraIncomeBtn:'➕ Extra Income', studentExtraBtn:'➕ Parents gave money / Extra income'
+  },
 };
 
 const DEFAULT_DATA = {
@@ -186,13 +230,15 @@ function Onboarding({onDone}){
   const [d,setD]=useState({salary:'4000000',currency:'UZS',salaryDay:'25',savings:'0',monthlySavings:'2000000',pocketMoney:'500000',dailyAmount:'50000'});
   const upd=(k,v)=>setD(p=>({...p,[k]:v}));
 
+  const t=T[d.lang||'ru'];
+
   // User type selection screen
   if(!userType) return(
     <div className="ob-overlay">
       <div className="ob-card pop-in">
         <span className="ob-emoji">👋</span>
-        <h2>Привет! Я KeepIt</h2>
-        <p>Умный финансовый помощник. Как ты получаешь деньги?</p>
+        <h2>{t.helloTitle}</h2>
+        <p>{t.helloSub}</p>
         
         <div style={{display:'flex', gap:10, marginBottom: 20}}>
           <select className="glass-input" value={d.lang||'ru'} onChange={e=>{upd('lang',e.target.value);}} style={{flex:1}}>
@@ -206,17 +252,17 @@ function Onboarding({onDone}){
         </div>
 
         <button className="btn-primary" style={{background:'linear-gradient(135deg,#d4773c,#c05e20)',marginBottom:12}} onClick={()=>{haptic('medium');setUserType('worker');}}>
-          💼 Я работаю — есть зарплата
+          {t.workerBtn}
         </button>
         <button className="btn-primary" style={{background:'linear-gradient(135deg,#2d7d46,#1a5c32)'}} onClick={()=>{haptic('medium');setUserType('student');}}>
-          🎓 Я студент / получаю от родителей
+          {t.studentBtn}
         </button>
       </div>
     </div>
   );
   // Worker steps
   const workerSteps=[
-    {emoji:'💰',title:'Твоя зарплата',sub:'Сколько получаешь и в какой день месяца?',content:(
+    {emoji:'💰',title:t.yourSalary,sub:t.yourSalarySub,content:(
       <div>
         <div className="input-group" style={{display:'flex',gap:8}}>
           <FormattedInput placeholder="4 000 000" value={d.salary} onChange={v=>upd('salary',v)} style={{flex:1}}/>
@@ -224,10 +270,10 @@ function Onboarding({onDone}){
             {CURRENCIES.map(c=><option key={c} style={{background:'var(--bg)'}}>{c}</option>)}
           </select>
         </div>
-        <input className="glass-input" type="number" placeholder="День выплаты (напр. 25)" value={d.salaryDay} onChange={e=>upd('salaryDay',e.target.value)} style={{marginTop:10}}/>
+        <input className="glass-input" type="number" placeholder={t.salaryDayPlace} value={d.salaryDay} onChange={e=>upd('salaryDay',e.target.value)} style={{marginTop:10}}/>
       </div>
     )},
-    {emoji:'🍽️',title:'Дневной бюджет',sub:'Ты работаешь 5 дней в неделю. Сколько в день на обед + транспорт?',content:(
+    {emoji:'🍽️',title:t.dailyBudget,sub:t.dailyBudgetSub,content:(
       <div>
         <div style={{fontSize:12,color:'var(--text2)',marginBottom:8}}>💡 Это включает еду и транспорт вместе</div>
         <div className="input-group">
@@ -237,16 +283,15 @@ function Onboarding({onDone}){
         <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>≈ {fmtShort((parseFloat(String(d.dailyAmount).replace(/\s/g,''))||0)*22)} {d.currency} в месяц (22 раб. дня)</div>
       </div>
     )},
-    {emoji:'💹',title:'Авто-накопления',sub:'Сколько с каждой зарплаты откладывать в накопления?',content:(
+    {emoji:'💹',title:t.saveAuto,sub:t.saveAutoSub,content:(
       <div>
         <div className="input-group">
           <FormattedInput placeholder="2 000 000" value={d.monthlySavings} onChange={v=>upd('monthlySavings',v)}/>
           <span className="input-suffix">{d.currency}</span>
         </div>
-        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>💡 Автоматически перейдёт в копилку при подтверждении зарплаты ✓</div>
       </div>
     )},
-    {emoji:'🏦',title:'Текущие накопления',sub:'Если уже есть сбережения — введи сумму. (Можно 0)',content:(
+    {emoji:'🏦',title:t.saveTarget,sub:t.saveTargetSub,content:(
       <div className="input-group">
         <FormattedInput placeholder="0" value={d.savings} onChange={v=>upd('savings',v)}/>
         <span className="input-suffix">{d.currency}</span>
@@ -255,7 +300,7 @@ function Onboarding({onDone}){
   ];
   // Student steps
   const studentSteps=[
-    {emoji:'💵',title:'Карманные деньги',sub:'Сколько сейчас есть на руках и на сколько дней они рассчитаны?',content:(
+    {emoji:'💵',title:t.pocketMoney,sub:t.pocketMoneySub,content:(
       <div>
         <div className="input-group" style={{display:'flex',gap:8,marginBottom:12}}>
           <FormattedInput placeholder="500 000" value={d.pocketMoney} onChange={v=>upd('pocketMoney',v)} style={{flex:1}}/>
@@ -263,20 +308,19 @@ function Onboarding({onDone}){
             {CURRENCIES.map(c=><option key={c} style={{background:'var(--bg)'}}>{c}</option>)}
           </select>
         </div>
-        <input className="glass-input" type="number" placeholder="На сколько дней? (например: 7)" value={d.pocketDays||''} onChange={e=>upd('pocketDays',e.target.value)}/>
-        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>Когда дадут ещё — добавишь в приложении ✓</div>
+        <input className="glass-input" type="number" placeholder={t.pocketDays} value={d.pocketDays||''} onChange={e=>upd('pocketDays',e.target.value)}/>
+        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>{t.pocketAddLater}</div>
       </div>
     )},
-    {emoji:'🍽️',title:'Дневной бюджет',sub:'Сколько в день на обед и дорогу?',content:(
+    {emoji:'🍽️',title:t.dailyBudget,sub:t.studentDailySub,content:(
       <div>
         <div className="input-group">
           <FormattedInput placeholder="30 000" value={d.dailyAmount} onChange={v=>upd('dailyAmount',v)}/>
           <span className="input-suffix">{d.currency} / день</span>
         </div>
-        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>Остальное будет идти в накопления автоматически 📈</div>
       </div>
     )},
-    {emoji:'🏦',title:'Цель накопления',sub:'Хочешь что-то накопить? (Можно пропустить)',content:(
+    {emoji:'🏦',title:t.saveTarget,sub:t.saveTargetSub,content:(
       <div className="input-group">
         <FormattedInput placeholder="0" value={d.savings} onChange={v=>upd('savings',v)}/>
         <span className="input-suffix">{d.currency}</span>
@@ -301,9 +345,9 @@ function Onboarding({onDone}){
         <h2>{cur.title}</h2><p>{cur.sub}</p>
         {cur.content}
         <div className="ob-dots" style={{marginTop:cur.content?16:0}}>{steps.map((_,i)=><div key={i} className={`ob-dot${i===step?' active':''}`}/>)}</div>
-        <button className="btn-primary" style={{marginTop:8}} onClick={next}>{step<steps.length-1?'Продолжить →':'Поехали! 🚀'}</button>
-        {step>0&&<button className="btn-ghost" onClick={next}>Пропустить</button>}
-        <button className="btn-ghost" style={{marginTop:4,fontSize:12,color:'var(--text3)'}} onClick={()=>{setUserType(null);setStep(0);}}>← Назад</button>
+        <button className="btn-primary" style={{marginTop:8}} onClick={next}>{step<steps.length-1?t.continue:t.letsGo}</button>
+        {step>0&&<button className="btn-ghost" onClick={next}>{t.skip}</button>}
+        <button className="btn-ghost" style={{marginTop:4,fontSize:12,color:'var(--text3)'}} onClick={()=>{setUserType(null);setStep(0);}}>{t.back}</button>
       </div>
     </div>
   );
@@ -377,26 +421,26 @@ function Dashboard({data,setData}){
       <div className="balance-card fade-up d1">
         <div className="bal-label">{t.available}</div>
         <div className="bal-amount">{fmt(balance,data.currency)}</div>
-        <div className="bal-sub">{data.userType==='student'?'Карманные деньги':'Зарплата'}: {fmt(totalIncome,data.currency)}{extraIncome>0&&` (+ ${fmtShort(extraIncome)} доп.)`}</div>
+        <div className="bal-sub">{data.userType==='student'?t.pocketMoney:t.salary}: {fmt(totalIncome,data.currency)}{extraIncome>0&&` (+ ${fmtShort(extraIncome)} ${data.lang==='en'?'extra':'доп.'})`}</div>
         <div className="pbar-wrap"><div className="pbar-fill" style={{width:progress+'%'}}/></div>
-        <div className="pbar-labels"><span>{daysLeft} дн. осталось</span><span>{Math.round(100-progress)}% {t.spent.toLowerCase()}</span></div>
+        <div className="pbar-labels"><span>{daysLeft} {data.lang==='en'?'days left':'дн. осталось'}</span><span>{Math.round(100-progress)}% {t.spent.toLowerCase()}</span></div>
       </div>
       <div className="breakdown-card fade-up d1">
-        <div className="bd-row"><span className="label">{data.userType==='student'?'💵 Карманные':'💰 Зарплата'}</span><span className="val">{fmt(baseSalary,data.currency)}</span></div>
-        {extraIncome>0&&<div className="bd-row"><span className="label">➕ Доп. доход</span><span className="val" style={{color:'var(--green)'}}>+{fmt(extraIncome,data.currency)}</span></div>}
-        <div className="bd-row"><span className="label">🍽️ {t.autoExpenses} / мес</span><span className="val" style={{color:'var(--coral)'}}>-{fmt(catMonthly,data.currency)}</span></div>
+        <div className="bd-row"><span className="label">{data.userType==='student'?`💵 ${t.pocketMoney}`:`💰 ${t.salary}`}</span><span className="val">{fmt(baseSalary,data.currency)}</span></div>
+        {extraIncome>0&&<div className="bd-row"><span className="label">➕ {t.extraIncomeBtn.substring(2)}</span><span className="val" style={{color:'var(--green)'}}>+{fmt(extraIncome,data.currency)}</span></div>}
+        <div className="bd-row"><span className="label">🍽️ {t.autoExpenses} / {data.lang==='en'?'mo':'мес'}</span><span className="val" style={{color:'var(--coral)'}}>-{fmt(catMonthly,data.currency)}</span></div>
         {fixedMonthly>0&&<div className="bd-row"><span className="label">📱 {t.subscriptions}</span><span className="val" style={{color:'var(--coral)'}}>-{fmt(fixedMonthly,data.currency)}</span></div>}
-        {monthlySav>0&&<div className="bd-row"><span className="label">🏦 Накопления (авто)</span><span className="val" style={{color:'var(--blue)'}}>-{fmt(monthlySav,data.currency)}</span></div>}
+        {monthlySav>0&&<div className="bd-row"><span className="label">🏦 {t.saveAuto}</span><span className="val" style={{color:'var(--blue)'}}>-{fmt(monthlySav,data.currency)}</span></div>}
         <div className="bd-divider"/>
         <div className="bd-row bd-total"><span className="label">{t.available}</span><span className="val" style={{color:balance>=0?'var(--green)':'var(--coral)'}}>{fmt(balance,data.currency)}</span></div>
       </div>
       {showSalary&&(
         <div className="card fade-up d2" style={{margin:'0 20px 12px',padding:'16px'}}>
-          <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>💸 Зарплата {now.getDate()}-го числа</div>
-          <div style={{fontSize:12,color:'var(--text2)',marginBottom:12}}>{fmt(data.salary,data.currency)}{data.monthlySavings>0?` · авто-откложится ${fmt(data.monthlySavings,data.currency)}`:''}</div>
+          <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>💸 {t.salaryOfDate} {now.getDate()}</div>
+          <div style={{fontSize:12,color:'var(--text2)',marginBottom:12}}>{fmt(data.salary,data.currency)}{data.monthlySavings>0?` · ${t.saveAuto} ${fmt(data.monthlySavings,data.currency)}`:''}</div>
           <div style={{display:'flex',gap:8}}>
-            <button className="btn-primary" style={{flex:2,margin:0,padding:'11px 0',background:'linear-gradient(135deg,#2d7d46,#1a5c32)'}} onClick={confirmSalary}>✅ Да, поступила!</button>
-            <button className="btn-ghost" style={{flex:1,margin:0,padding:'11px 0',fontSize:12}} onClick={dismissSalaryTomorrow}>⏰ Ещё нет</button>
+            <button className="btn-primary" style={{flex:2,margin:0,padding:'11px 0',background:'linear-gradient(135deg,#2d7d46,#1a5c32)'}} onClick={confirmSalary}>{t.salaryConfirmed}</button>
+            <button className="btn-ghost" style={{flex:1,margin:0,padding:'11px 0',fontSize:12}} onClick={dismissSalaryTomorrow}>{t.salaryNotYet}</button>
           </div>
         </div>
       )}
@@ -449,9 +493,9 @@ function Dashboard({data,setData}){
           ))}
         </div>
       )}
-      <div className="sec-title fade-up d4" style={{marginTop:4}}>{data.lang==='en'?'Large Expenses':'Крупные расходы'}</div>
+      <div className="sec-title fade-up d4" style={{marginTop:4}}>{t.largeExpenses}</div>
       <div className="big-list fade-up d5">
-        {thisMonthBig.length===0&&<div style={{textAlign:'center',color:'var(--text3)',padding:'16px 0',fontSize:13}}>{data.lang==='en'?'No large expenses this month':'Нет крупных трат в этом месяце'}</div>}
+        {thisMonthBig.length===0&&<div style={{textAlign:'center',color:'var(--text3)',padding:'16px 0',fontSize:13}}>{t.noLargeExpenses}</div>}
         {thisMonthBig.map(be=>(
           <div className="big-item" key={be.id}>
             <div className="bi-icon">{be.icon}</div>
@@ -462,12 +506,12 @@ function Dashboard({data,setData}){
             <div className="bi-amount" style={{color:be.fromSavings?'var(--blue)':'var(--coral)'}}>-{fmt(be.amount,data.currency)}</div>
           </div>
         ))}
-        <button className="add-btn" onClick={()=>{haptic('light');setSheet(true);}}>+ {data.lang==='en'?'Add Large Expense':'Добавить крупный расход'}</button>
+        <button className="add-btn" onClick={()=>{haptic('light');setSheet(true);}}>{t.addLargeExpense}</button>
       </div>
       {/* Extra income button */}
       <div style={{padding:'0 20px',marginBottom:20}}>
         <button className="add-btn" style={{borderColor:'var(--green)',color:'var(--green)',background:'var(--green-soft)'}} onClick={()=>{haptic('light');setIncomeSheet(true);}}>
-          ➕ {data.userType==='student'?'\u0420\u043e\u0434\u0438\u0442\u0435\u043b\u0438 \u0434\u0430\u043b\u0438 \u0434\u0435\u043d\u044c\u0433\u0438 / \u0414\u043e\u043f. \u0434\u043e\u0445\u043e\u0434':'\u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0439 \u0434\u043e\u0445\u043e\u0434'}
+          {data.userType==='student'?t.studentExtraBtn:t.extraIncomeBtn}
         </button>
         {/* this month extra income entries */}
         {(data.incomeEntries||[]).filter(e=>{const d=new Date(e.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).map(e=>(
@@ -479,11 +523,11 @@ function Dashboard({data,setData}){
         ))}
       </div>
       
-      <div className="sec-title fade-up" style={{marginTop:4}}>🎉 Ближайшие события</div>
+      <div className="sec-title fade-up" style={{marginTop:4}}>🎉 {t.nearestEvents}</div>
       <div style={{padding:'0 20px',marginBottom:20}}>
-        {closestEvents.length===0&&<div style={{textAlign:'center',color:'var(--text3)',padding:'16px 0',fontSize:13}}>Нет ближайших событий</div>}
+        {closestEvents.length===0&&<div style={{textAlign:'center',color:'var(--text3)',padding:'16px 0',fontSize:13}}>{t.noEvents}</div>}
         {closestEvents.map((ev,i)=>{
-          const d=new Date(ev.date);const dl=Math.ceil((d-now)/86400000);const mon=d.toLocaleString('ru-RU',{month:'short'}).replace('.','');
+          const d=new Date(ev.date);const dl=Math.ceil((d-now)/86400000);const mon=d.toLocaleString(data.lang==='en'?'en-US':'ru-RU',{month:'short'}).replace('.','');
           const isW=dl>=0&&dl<=7,isM=dl>7&&dl<=30;
           return(<div className="event-card fade-up" key={ev.id} style={{animationDelay:i*0.05+'s', borderColor:isW?'rgba(217,119,6,.3)':undefined}}>
             <div className="ev-date-box" style={isW?{background:'var(--gold-soft)'}:{}}>
@@ -492,7 +536,7 @@ function Dashboard({data,setData}){
             </div>
             <div style={{flex:1}}>
               <div className="ev-name">{ev.name}</div>
-              <div className="ev-sub">{dl===0?'🎉 Сегодня!':dl===1?'Завтра!':`Через ${dl} дн.`}</div>
+              <div className="ev-sub">{dl===0?`🎉 ${t.today}!`:dl===1?`${t.yesterday}!`:data.lang==='en'?`In ${dl} days`:`Через ${dl} дн.`}</div>
               <div style={{display:'flex',gap:5,flexWrap:'wrap',marginTop:3}}>
                 {isW&&<span className="ev-badge week">⚡ {dl} дн.</span>}
                 {isM&&<span className="ev-badge month">📅 {dl} дн.</span>}
@@ -504,14 +548,14 @@ function Dashboard({data,setData}){
         })}
         {showEvForm?(
           <div className="card fade-up" style={{padding:14,marginBottom:8}}>
-            <input className="glass-input" placeholder="Имя или название" value={evForm.name} onChange={e=>setEvForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+            <input className="glass-input" placeholder={t.eventName} value={evForm.name} onChange={e=>setEvForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
             <input className="glass-input" type="date" value={evForm.date} onChange={e=>setEvForm(p=>({...p,date:e.target.value}))} style={{marginBottom:10,colorScheme:'light'}}/>
-            <FormattedInput placeholder="Бюджет на подарок (необяз.)" value={evForm.budget} onChange={v=>setEvForm(p=>({...p,budget:v}))} style={{marginBottom:12}}/>
-            <button className="btn-primary" onClick={addEv}>Добавить</button>
-            <button className="btn-ghost" onClick={()=>setShowEvForm(false)}>Отмена</button>
+            <FormattedInput placeholder={t.eventBudget} value={evForm.budget} onChange={v=>setEvForm(p=>({...p,budget:v}))} style={{marginBottom:12}}/>
+            <button className="btn-primary" onClick={addEv}>{t.addEvent.substring(2)}</button>
+            <button className="btn-ghost" onClick={()=>setShowEvForm(false)}>{t.cancel}</button>
           </div>
         ):(
-          <button className="add-btn fade-up" onClick={()=>{haptic('light');setShowEvForm(true);}}>+ Добавить событие</button>
+          <button className="add-btn fade-up" onClick={()=>{haptic('light');setShowEvForm(true);}}>{t.addEvent}</button>
         )}
       </div>
 
@@ -606,8 +650,8 @@ function BudgetPage({data,setData}){
           <div className="card" style={{padding:16,marginTop:4}}>
             <div className="icon-row">{ICONS.map(ic=><span key={ic} className={`icon-opt${selIcon===ic?' selected':''}`} onClick={()=>setSelIcon(ic)}>{ic}</span>)}</div>
             <input className="glass-input" placeholder="Onefit, Netflix…" value={fixE.name} onChange={e=>setFixE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-            <FormattedInput placeholder="Сумма в месяц" value={fixE.amount} onChange={v=>setFixE(p=>({...p,amount:v}))} style={{marginBottom:10}}/>
-            <input className="glass-input" type="number" placeholder="День списания (1-31)" value={fixE.day} onChange={e=>setFixE(p=>({...p,day:e.target.value}))} style={{marginBottom:12}}/>
+            <FormattedInput placeholder={data.lang==='en'?"Monthly amount":"Сумма в месяц"} value={fixE.amount} onChange={v=>setFixE(p=>({...p,amount:v}))} style={{marginBottom:10}}/>
+            <input className="glass-input" type="number" placeholder={data.lang==='en'?"Billing day (1-31)":"День списания (1-31)"} value={fixE.day} onChange={e=>setFixE(p=>({...p,day:e.target.value}))} style={{marginBottom:12}}/>
             <button className="btn-primary" onClick={saveFix}>{t.save}</button><button className="btn-ghost" onClick={()=>{setShowFF(false);setFixE({id:'',name:'',amount:'',day:'1'});}}>{t.cancel}</button>
           </div>
         ) : (
@@ -619,22 +663,22 @@ function BudgetPage({data,setData}){
         {(data.contracts||[]).map(con=>(
           <div className="contract-card" key={con.id}>
             <div className="contract-name">{con.icon} {con.name}</div>
-            <div className="contract-total">Итого: {fmt(con.totalAmount,data.currency)}</div>
+            <div className="contract-total">{data.lang==='en'?'Total:':'Итого:'} {fmt(con.totalAmount,data.currency)}</div>
             {con.installments.map((ins,i)=>(
               <div className="contract-payment" key={i}>
                 <div className="cp-pct">{ins.percent}%</div>
-                <div className="cp-info"><div className="cp-amount">{fmt(ins.amount,data.currency)}</div>{ins.dueDate&&<div className="cp-date">До {new Date(ins.dueDate).toLocaleDateString('ru-RU',{day:'2-digit',month:'long'})}</div>}</div>
-                <button className={`cp-paid ${ins.paid?'yes':'no'}`} onClick={()=>togglePaid(con.id,ins.id??i)}>{ins.paid?'✓ Оплачено':'Не оплачено'}</button>
+                <div className="cp-info"><div className="cp-amount">{fmt(ins.amount,data.currency)}</div>{ins.dueDate&&<div className="cp-date">{data.lang==='en'?'Due':'До'} {new Date(ins.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'long'})}</div>}</div>
+                <button className={`cp-paid ${ins.paid?'yes':'no'}`} onClick={()=>togglePaid(con.id,ins.id??i)}>{ins.paid?(data.lang==='en'?'✓ Paid':'✓ Оплачено'):(data.lang==='en'?'Unpaid':'Не оплачено')}</button>
               </div>
             ))}
-            <button className="btn-sm" style={{marginTop:8,color:'var(--coral)',width:'100%'}} onClick={()=>{haptic('medium');setData(d=>({...d,contracts:(d.contracts||[]).filter(x=>x.id!==con.id)}))}}>Удалить</button>
+            <button className="btn-sm" style={{marginTop:8,color:'var(--coral)',width:'100%'}} onClick={()=>{haptic('medium');setData(d=>({...d,contracts:(d.contracts||[]).filter(x=>x.id!==con.id)}))}}>{data.lang==='en'?'Delete':'Удалить'}</button>
           </div>
         ))}
         {showCon?(<div className="card fade-up" style={{padding:16,marginBottom:12}}>
           <div className="icon-row">{['🎓','🏥','🏠','✈️','🎯'].map(ic=><span key={ic} className={`icon-opt${selIcon===ic?' selected':''}`} onClick={()=>setSelIcon(ic)}>{ic}</span>)}</div>
-          <input className="glass-input" placeholder="Контракт универа…" value={conE.name} onChange={e=>setConE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-          <FormattedInput placeholder="Общая сумма" value={conE.totalAmount} onChange={v=>setConE(p=>({...p,totalAmount:v}))} style={{marginBottom:10}}/>
-          <div style={{fontSize:12,color:'var(--text2)',marginBottom:8}}>Взносы (% + срок оплаты)</div>
+          <input className="glass-input" placeholder={data.lang==='en'?"University contract...":"Контракт универа…"} value={conE.name} onChange={e=>setConE(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+          <FormattedInput placeholder={data.lang==='en'?"Total amount":"Общая сумма"} value={conE.totalAmount} onChange={v=>setConE(p=>({...p,totalAmount:v}))} style={{marginBottom:10}}/>
+          <div style={{fontSize:12,color:'var(--text2)',marginBottom:8}}>{data.lang==='en'?"Installments (% + due date)":"Взносы (% + срок оплаты)"}</div>
           {conE.installments.map((ins,i)=>(
             <div key={i} style={{display:'flex',gap:8,marginBottom:8,alignItems:'center'}}>
               <FormattedInput placeholder="%" value={ins.percent} onChange={v=>setConE(p=>({...p,installments:p.installments.map((x,j)=>j===i?{...x,percent:parseFloat(v)||0}:x)}))} style={{width:70}}/>
@@ -642,7 +686,7 @@ function BudgetPage({data,setData}){
               {i>0&&<button className="btn-sm" style={{color:'var(--coral)',padding:'8px'}} onClick={()=>setConE(p=>({...p,installments:p.installments.filter((_,j)=>j!==i)}))}>✕</button>}
             </div>
           ))}
-          <button className="btn-sm" style={{marginBottom:12,width:'100%'}} onClick={()=>setConE(p=>({...p,installments:[...p.installments,{percent:25,dueDate:''}]}))}>+ Добавить взнос</button>
+          <button className="btn-sm" style={{marginBottom:12,width:'100%'}} onClick={()=>setConE(p=>({...p,installments:[...p.installments,{percent:25,dueDate:''}]}))}>{data.lang==='en'?'+ Add installment':'+ Добавить взнос'}</button>
           <button className="btn-primary" onClick={saveCon}>{t.save}</button>
           <button className="btn-ghost" onClick={()=>setShowCon(false)}>{t.cancel}</button>
         </div>):(<button className="add-btn" onClick={()=>{haptic('light');setSelIcon('🎓');setShowCon(true);}}>{t.addContract}</button>)}
@@ -730,7 +774,7 @@ function EventsPage({data,setData}){
       <div className="page-hdr fade-up"><h1>{t.events} 🎉</h1></div>
       <div style={{padding:'0 20px'}}>
         {sorted.map((ev,i)=>{
-          const d=new Date(ev.date);const dl=Math.ceil((d-now)/86400000);const mon=d.toLocaleString('ru-RU',{month:'short'}).replace('.','');
+          const d=new Date(ev.date);const dl=Math.ceil((d-now)/86400000);const mon=d.toLocaleString(data.lang==='en'?'en-US':'ru-RU',{month:'short'}).replace('.','');
           const isW=dl>=0&&dl<=7,isM=dl>7&&dl<=30,isPast=dl<0;
           return(<div className="event-card fade-up" key={ev.id} style={{animationDelay:i*0.06+'s',opacity:isPast?.6:1,borderColor:isW?'rgba(217,119,6,.3)':undefined}}>
             <div className="ev-date-box" style={isW?{background:'var(--gold-soft)'}:isPast?{background:'var(--surface2)'}:{}}>
@@ -739,7 +783,7 @@ function EventsPage({data,setData}){
             </div>
             <div className="ev-info" style={{flex:1}}>
               <div className="ev-name">{ev.name}</div>
-              <div className="ev-sub">{isPast?`${Math.abs(dl)} дн. назад`:dl===0?'🎉 Сегодня!':dl===1?'Завтра!':dl>0?`Через ${dl} дн.`:''}</div>
+              <div className="ev-sub">{isPast?`${Math.abs(dl)} ${data.lang==='en'?'days ago':'дн. назад'}`:dl===0?`🎉 ${t.today}!`:dl===1?(data.lang==='en'?'Tomorrow!':'Завтра!'):dl>0?(data.lang==='en'?`In ${dl} days`:`Через ${dl} дн.`):''}</div>
               <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:4}}>
                 {isW&&<span className="ev-badge week">⚡ {dl} дн.</span>}
                 {isM&&<span className="ev-badge month">📅 {dl} дн.</span>}
@@ -765,7 +809,21 @@ function EventsPage({data,setData}){
 function SettingsPage({data,setData}){
   const t=T[data.lang||'ru'];
   const [feedbackText,setFeedbackText]=useState('');
-  const sendFeedback=()=>{if(!feedbackText.trim())return;haptic('medium');if(tg?.sendData){try{tg.sendData(JSON.stringify({action:'feedback',text:feedbackText}));}catch(e){}}alert('Спасибо за ваш отзыв! Мы обязательно его рассмотрим.');setFeedbackText('');};
+  const sendFeedback=async ()=>{
+    if(!feedbackText.trim())return;
+    haptic('medium');
+    try {
+      const uname = tg?.initDataUnsafe?.user?.username || tg?.initDataUnsafe?.user?.first_name || 'Аноним';
+      const uid = tg?.initDataUnsafe?.user?.id || 0;
+      await fetch('https://keepit-app.vercel.app/api/feedback', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_name: uname, user_id: uid, text: feedbackText})
+      });
+    } catch(e) {}
+    alert('Спасибо за ваш отзыв! Мы обязательно его рассмотрим.');
+    setFeedbackText('');
+  };
   const resetAll=()=>{if(!window.confirm(data.lang==='en'?'Reset all data?':'Сбросить все данные?'))return;haptic('heavy');localStorage.clear();window.location.reload();};
   return(
     <div className="page">
@@ -821,32 +879,29 @@ function SettingsPage({data,setData}){
           <FormattedInput value={data.savingsBalance||0} onChange={v=>setData(d=>({...d,savingsBalance:parseFloat(v)||0}))} style={{background:'none',border:'none',color:'var(--blue)',fontWeight:700,fontFamily:'inherit',fontSize:13,width:130,textAlign:'right',outline:'none'}}/>
         </div>
       </div>
-      <div className="sec-title fade-up d3">💡 Идеи и Жалобы</div>
+      <div className="sec-title fade-up d3">{t.feedback}</div>
       <div className="settings-group fade-up d3" style={{padding:16,display:'flex',flexDirection:'column'}}>
-        <textarea className="glass-input" placeholder="Напишите вашу идею, жалобу или предложение..." value={feedbackText} onChange={e=>setFeedbackText(e.target.value)} style={{minHeight:80,marginBottom:12,resize:'vertical',padding:12}}/>
-        <button className="btn-primary" onClick={sendFeedback} style={{margin:0}}>📤 Отправить</button>
+        <textarea className="glass-input" placeholder={t.feedbackPlaceholder} value={feedbackText} onChange={e=>setFeedbackText(e.target.value)} style={{minHeight:80,marginBottom:12,resize:'vertical',padding:12}}/>
+        <button className="btn-primary" onClick={sendFeedback} style={{margin:0}}>{t.feedbackSubmit}</button>
       </div>
-      <div className="sec-title fade-up d3">🤖 Telegram уведомления</div>
+      <div className="sec-title fade-up d3">{t.tgNotifications}</div>
       <div className="settings-group fade-up d4">
         <div className="settings-row">
           <div className="sr-icon">🔔</div>
-          <div className="sr-label" style={{fontSize:13}}>Уведомления через бота</div>
-          <div style={{fontSize:11,color:'var(--green)',fontWeight:700}}>✓ Авто</div>
+          <div className="sr-label" style={{fontSize:13}}>{t.tgDesc1}</div>
+          <div style={{fontSize:11,color:'var(--green)',fontWeight:700}}>✓ {data.lang==='en'?'Auto':'Авто'}</div>
         </div>
         <div className="settings-row" style={{flexDirection:'column',alignItems:'flex-start',gap:6}}>
           <div style={{fontSize:12,color:'var(--text2)',lineHeight:1.6}}>
-            Настроено автоматически. Уведомления приходят когда:
+            {t.tgDesc2}
           </div>
           <div style={{fontSize:12,color:'var(--text3)',lineHeight:1.8}}>
-            💰 Подтверждаете зарплату<br/>
-            ⏰ Откладываете (завтра)<br/>
-            💸 Добавляете долг / закрываете долг<br/>
-            📄 Крупный расход
+            {t.tgDesc3.split('\n').map((line,i)=><div key={i}>{line}</div>)}
           </div>
         </div>
         <div className="settings-row">
-          <button className="btn-sm" style={{width:'100%',background:'var(--accent-soft)',color:'var(--accent)',borderColor:'var(--accent)'}} onClick={()=>{haptic('medium');sendBotMsg('🔔 KeepIt: тест уведомления работает! ✅');}}>
-            🔔 Отправить тест
+          <button className="btn-sm" style={{width:'100%',background:'var(--accent-soft)',color:'var(--accent)',borderColor:'var(--accent)'}} onClick={()=>{haptic('medium');sendBotMsg(data.lang==='en'?'🔔 KeepIt: notifications are working! ✅':'🔔 KeepIt: тест уведомления работает! ✅');}}>
+            {t.tgTest}
           </button>
         </div>
       </div>
@@ -858,7 +913,7 @@ function SettingsPage({data,setData}){
   );
 }
 
-const NAV_ICONS={
+  const NAV_ICONS={
   home:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>,
   budget:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1h-9a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h9zm-9-2h10V8H12v8zm4-2.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>,
   debts:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>,
@@ -912,37 +967,37 @@ function DebtsPage({data,setData}){
   const totalOwe=iOwe.reduce((s,d)=>s+(d.amount-(d.paidAmount||0)),0);
   const totalOwed=owedToMe.reduce((s,d)=>s+(d.amount-(d.paidAmount||0)),0);
   return(
-    <div className="page">
-      <div className="page-hdr fade-up"><h1>💸 Долги</h1></div>
+    <div className="page" style={{paddingBottom:80}}>
+      <div className="page-hdr fade-up"><h1>💸 {t.debts}</h1></div>
       {/* Summary */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,padding:'0 20px',marginBottom:14}}>
         <div className="card" style={{padding:14,textAlign:'center'}}>
-          <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>Я должен</div>
+          <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>{t.iOwe}</div>
           <div style={{fontSize:18,fontWeight:800,color:'var(--coral)'}}>{fmtShort(totalOwe)}</div>
-          <div style={{fontSize:11,color:'var(--text3)'}}>{iOwe.length} долг{iOwe.length===1?'':'ов'}</div>
+          <div style={{fontSize:11,color:'var(--text3)'}}>{iOwe.length}</div>
         </div>
         <div className="card" style={{padding:14,textAlign:'center'}}>
-          <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>Мне должны</div>
+          <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>{t.owedToMe}</div>
           <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{fmtShort(totalOwed)}</div>
-          <div style={{fontSize:11,color:'var(--text3)'}}>{owedToMe.length} долг{owedToMe.length===1?'':'ов'}</div>
+          <div style={{fontSize:11,color:'var(--text3)'}}>{owedToMe.length}</div>
         </div>
       </div>
       {iOwe.length>0&&<>
-        <div className="debt-section-hdr"><span>Я должен</span><span className="total" style={{color:'var(--coral)'}}>{fmt(totalOwe,data.currency)}</span></div>
+        <div className="debt-section-hdr"><span>{t.iOwe}</span><span className="total" style={{color:'var(--coral)'}}>{fmt(totalOwe,data.currency)}</span></div>
         <div style={{padding:'0 20px'}}>
           {iOwe.map(d=>(
             <div className="debt-card" key={d.id}>
               <div className="debt-icon owe">💸</div>
               <div className="debt-info">
                 <div className="debt-name">{d.name}</div>
-                <div className="debt-meta">{d.note||''}{d.dueDate?` · До ${new Date(d.dueDate).toLocaleDateString('ru-RU',{day:'2-digit',month:'short'})}`:''}</div>
-                {d.paidAmount>0&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>Уже выплачено: {fmtShort(d.paidAmount)} из {fmtShort(d.amount)}</div>}
+                <div className="debt-meta">{d.note||''}{d.dueDate?` · ${data.lang==='en'?'Due':'До'} ${new Date(d.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'short'})}`:''}</div>
+                {d.paidAmount>0&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{data.lang==='en'?'Paid:':'Уже выплачено:'} {fmtShort(d.paidAmount)} / {fmtShort(d.amount)}</div>}
               </div>
               <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
                 <div className="debt-amount owe">-{fmt(d.amount-(d.paidAmount||0),data.currency)}</div>
                 <div style={{display:'flex',gap:6}}>
-                  <button className="debt-paid" style={{background:'var(--surface2)',color:'var(--text2)',padding:'6px 10px'}} onClick={()=>{haptic('light');setPartialId(d.id);}}>Частями</button>
-                  <button className="debt-paid" style={{padding:'6px 10px'}} onClick={()=>markPaid(d.id)}>✓ Все</button>
+                  <button className="debt-paid" style={{background:'var(--surface2)',color:'var(--text2)',padding:'6px 10px'}} onClick={()=>{haptic('light');setPartialId(d.id);}}>{t.paidPart}</button>
+                  <button className="debt-paid" style={{padding:'6px 10px'}} onClick={()=>markPaid(d.id)}>{t.paidAll}</button>
                 </div>
               </div>
             </div>
@@ -950,21 +1005,21 @@ function DebtsPage({data,setData}){
         </div>
       </>}
       {owedToMe.length>0&&<>
-        <div className="debt-section-hdr" style={{marginTop:8}}><span>Мне должны</span><span className="total" style={{color:'var(--green)'}}>{fmt(totalOwed,data.currency)}</span></div>
+        <div className="debt-section-hdr" style={{marginTop:8}}><span>{t.owedToMe}</span><span className="total" style={{color:'var(--green)'}}>{fmt(totalOwed,data.currency)}</span></div>
         <div style={{padding:'0 20px'}}>
           {owedToMe.map(d=>(
             <div className="debt-card" key={d.id}>
               <div className="debt-icon owed">🤝</div>
               <div className="debt-info">
                 <div className="debt-name">{d.name}</div>
-                <div className="debt-meta">{d.note||''}{d.dueDate?` · До ${new Date(d.dueDate).toLocaleDateString('ru-RU',{day:'2-digit',month:'short'})}`:''}</div>
-                {d.paidAmount>0&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>Уже вернули: {fmtShort(d.paidAmount)} из {fmtShort(d.amount)}</div>}
+                <div className="debt-meta">{d.note||''}{d.dueDate?` · ${data.lang==='en'?'Due':'До'} ${new Date(d.dueDate).toLocaleDateString(data.lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'short'})}`:''}</div>
+                {d.paidAmount>0&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{data.lang==='en'?'Returned:':'Уже вернули:'} {fmtShort(d.paidAmount)} / {fmtShort(d.amount)}</div>}
               </div>
               <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:6}}>
                 <div className="debt-amount owed">+{fmt(d.amount-(d.paidAmount||0),data.currency)}</div>
                 <div style={{display:'flex',gap:6}}>
-                  <button className="debt-paid" style={{background:'var(--surface2)',color:'var(--text2)',padding:'6px 10px'}} onClick={()=>{haptic('light');setPartialId(d.id);}}>Частями</button>
-                  <button className="debt-paid" style={{padding:'6px 10px'}} onClick={()=>markPaid(d.id)}>✓ Все</button>
+                  <button className="debt-paid" style={{background:'var(--surface2)',color:'var(--text2)',padding:'6px 10px'}} onClick={()=>{haptic('light');setPartialId(d.id);}}>{t.paidPart}</button>
+                  <button className="debt-paid" style={{padding:'6px 10px'}} onClick={()=>markPaid(d.id)}>{t.paidAll}</button>
                 </div>
               </div>
             </div>
@@ -975,23 +1030,23 @@ function DebtsPage({data,setData}){
         {showForm?(
           <div className="card fade-up" style={{padding:16,marginBottom:10}}>
             <div style={{display:'flex',gap:8,marginBottom:12}}>
-              {[['owe','💸 Я должен'],['owed','🤝 Мне должны']].map(([val,label])=>(
+              {[['owe',`💸 ${t.iOwe}`],['owed',`🤝 ${t.owedToMe}`]].map(([val,label])=>(
                 <button key={val} className="btn-sm" style={{flex:1,padding:10,borderColor:form.type===val?'var(--accent)':'var(--border)',color:form.type===val?'var(--accent)':'var(--text2)',background:form.type===val?'var(--accent-soft)':'var(--surface2)'}} onClick={()=>setForm(p=>({...p,type:val}))}>{label}</button>
               ))}
             </div>
-            <input className="glass-input" placeholder="Имя (Алишер, Ваня…)" value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
-            <FormattedInput placeholder={`Сумма (${data.currency})`} value={form.amount} onChange={v=>setForm(p=>({...p,amount:v}))} style={{marginBottom:10,background:'none',border:'1px solid var(--border)',padding:'10px',borderRadius:8,width:'100%',boxSizing:'border-box'}}/>
-            <input className="glass-input" placeholder="Примечание (необяз.)" value={form.note} onChange={e=>setForm(p=>({...p,note:e.target.value}))} style={{marginBottom:10}}/>
+            <input className="glass-input" placeholder={t.debtName} value={form.name} onChange={e=>setForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
+            <FormattedInput placeholder={`${t.debtAmount} (${data.currency})`} value={form.amount} onChange={v=>setForm(p=>({...p,amount:v}))} style={{marginBottom:10,background:'none',border:'1px solid var(--border)',padding:'10px',borderRadius:8,width:'100%',boxSizing:'border-box'}}/>
+            <input className="glass-input" placeholder={t.debtNote} value={form.note} onChange={e=>setForm(p=>({...p,note:e.target.value}))} style={{marginBottom:10}}/>
             <input className="glass-input" type="date" value={form.dueDate} onChange={e=>setForm(p=>({...p,dueDate:e.target.value}))} style={{marginBottom:12,colorScheme:'light'}}/>
-            <button className="btn-primary" onClick={addDebt}>Добавить долг</button>
-            <button className="btn-ghost" onClick={()=>setShowForm(false)}>Отмена</button>
+            <button className="btn-primary" onClick={addDebt}>{t.addDebt.substring(2)}</button>
+            <button className="btn-ghost" onClick={()=>setShowForm(false)}>{t.cancel}</button>
           </div>
         ):(
-          <button className="add-btn fade-up" onClick={()=>{haptic('light');setShowForm(true);}}>+ Добавить долг</button>
+          <button className="add-btn fade-up" onClick={()=>{haptic('light');setShowForm(true);}}>{t.addDebt}</button>
         )}
       </div>
       {paid.length>0&&<>
-        <div className="sec-title" style={{marginTop:8}}>✅ Закрытые</div>
+        <div className="sec-title" style={{marginTop:8}}>✅ {data.lang==='en'?'Closed':'Закрытые'}</div>
         <div style={{padding:'0 20px',marginBottom:16}}>
           {paid.map(d=>(
             <div className="debt-card" key={d.id} style={{opacity:.6}}>
@@ -1115,26 +1170,20 @@ function HistoryPage({data,setData}){
   filteredItems.forEach(i => {
     const d = new Date(i.date);
     const ds = d.toDateString();
-    let key = d.toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
-    if(ds === todayStr) key = "Сегодня, " + key;
-    else if(ds === yesterdayStr) key = "Вчера, " + key;
+    let key = d.toLocaleDateString(data.lang==='en'?'en-US':'ru-RU', {day:'numeric', month:'long'});
+    if(ds === todayStr) key = `${t.today}, ` + key;
+    else if(ds === yesterdayStr) key = `${t.yesterday}, ` + key;
     
     if(!grouped[key]) grouped[key] = [];
     grouped[key].push(i);
   });
 
-  // Events section
-  const events=[...(data.events||[])].sort((a,b)=>new Date(a.date)-new Date(b.date)).filter(e=>new Date(e.date)>=now||Math.ceil((new Date(e.date)-now)/86400000)>-30);
-  const [showEvForm,setShowEvForm]=useState(false);
-  const [evForm,setEvForm]=useState({name:'',date:'',budget:''});
-  const addEv=()=>{if(!evForm.name||!evForm.date)return;haptic('medium');setData(d=>({...d,events:[...(d.events||[]),{id:Date.now(),name:evForm.name,date:evForm.date,budget:parseFloat(evForm.budget)||0}]}));setShowEvForm(false);setEvForm({name:'',date:'',budget:''});};
-
   return(
     <div className="page">
       <div className="page-hdr fade-up" style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
         <div>
-          <h1>📊 История</h1>
-          <p>{viewDate.toLocaleString('ru-RU',{month:'long',year:'numeric'})}</p>
+          <h1>📊 {t.history}</h1>
+          <p>{viewDate.toLocaleString(data.lang==='en'?'en-US':'ru-RU',{month:'long',year:'numeric'})}</p>
         </div>
         <div style={{display:'flex',gap:4}}>
           <button className="btn-ghost" style={{padding:'6px 12px',margin:0,minWidth:'auto'}} onClick={()=>{haptic('light');setViewDate(new Date(y,m-1,1))}}>⬅️</button>
@@ -1144,18 +1193,18 @@ function HistoryPage({data,setData}){
       {/* Month summary */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,padding:'0 20px',marginBottom:14}}>
         <div className="card" style={{padding:14,textAlign:'center'}}>
-          <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>Расходы</div>
+          <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>{t.expenses}</div>
           <div style={{fontSize:18,fontWeight:800,color:'var(--coral)'}}>{fmtShort(totalOut)}</div>
         </div>
         <div className="card" style={{padding:14,textAlign:'center'}}>
-          <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>Поступления</div>
+          <div style={{fontSize:11,color:'var(--text2)',marginBottom:4}}>{t.income}</div>
           <div style={{fontSize:18,fontWeight:800,color:'var(--green)'}}>{fmtShort(totalIn)}</div>
         </div>
       </div>
       
       {/* Filter Row */}
       <div style={{display:'flex',gap:8,padding:'0 20px',marginBottom:16}}>
-        {[['all','Все'],['expense','Расходы'],['income','Поступления']].map(([val,label])=>(
+        {[['all',t.all],['expense',t.expenses],['income',t.income]].map(([val,label])=>(
           <button key={val} className={`btn-sm ${filter===val?'active':''}`} 
             style={{flex:1, padding:'8px 0', 
                     background:filter===val?'var(--accent-soft)':'var(--surface2)', 
@@ -1166,8 +1215,8 @@ function HistoryPage({data,setData}){
       </div>
       
       <div style={{padding:'0 20px',marginBottom:16}}>
-        <button className="btn-ghost" style={{width:'100%',color:'var(--blue)',borderColor:'rgba(37,99,235,0.3)',marginBottom:16}} onClick={downloadCSV}>📥 Скачать CSV (за {viewDate.toLocaleString('ru-RU',{month:'long'})})</button>
-        {Object.keys(grouped).length===0&&<div style={{textAlign:'center',color:'var(--text3)',padding:'20px 0',fontSize:13}}>Нет операций в этом месяце</div>}
+        <button className="btn-ghost" style={{width:'100%',color:'var(--blue)',borderColor:'rgba(37,99,235,0.3)',marginBottom:16}} onClick={downloadCSV}>{t.downloadCSV} ({viewDate.toLocaleString(data.lang==='en'?'en-US':'ru-RU',{month:'long'})})</button>
+        {Object.keys(grouped).length===0&&<div style={{textAlign:'center',color:'var(--text3)',padding:'20px 0',fontSize:13}}>{t.noHistory}</div>}
         {Object.entries(grouped).map(([dateLabel, dayItems]) => (
           <div key={dateLabel} style={{marginBottom: 16}}>
             <div style={{fontSize: 13, color: 'var(--text2)', marginBottom: 8, fontWeight: 700}}>{dateLabel}</div>
