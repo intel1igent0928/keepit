@@ -126,17 +126,41 @@ async def api_feedback(req: FeedbackRequest):
     if not ADMIN_CHAT_ID:
         return {"ok": False, "error": "Admin chat ID not set"}
     
-    user_info = f"@{req.user_name}" if req.user_name != "Аноним" else f"ID: {req.user_id}"
+    user_info = f"@{req.user_name} (ID: {req.user_id})" if req.user_name != "Аноним" else f"ID: {req.user_id}"
     msg = f"💡 <b>Новая идея/жалоба!</b>\n\nОт: {user_info}\nТекст: {req.text}"
     res = await send_notification(NotifyRequest(tg_user_id=int(ADMIN_CHAT_ID), text=msg))
     return {"ok": True, "result": res}
 
 @app.post("/webhook")
 async def telegram_webhook(req: Request):
-    """Receive updates from Telegram Bot (e.g. web_app_data)."""
-    update = await req.json()
+    """Receive updates from Telegram Bot."""
+    try:
+        update = await req.json()
+    except:
+        return {"ok": True}
+        
     message = update.get("message", {})
     
+    # 1. Handle Admin Reply to Feedback
+    if "reply_to_message" in message and "text" in message:
+        reply_orig = message["reply_to_message"]
+        orig_text = reply_orig.get("text", "")
+        if "Новая идея/жалоба!" in orig_text and "ID:" in orig_text:
+            import re
+            match = re.search(r"ID:\s*(\d+)", orig_text)
+            if match:
+                user_id_to_reply = int(match.group(1))
+                admin_text = message["text"]
+                reply_msg = f"📩 <b>Ответ от разработчика:</b>\n\n{admin_text}"
+                try:
+                    await send_notification(NotifyRequest(tg_user_id=user_id_to_reply, text=reply_msg))
+                    # Optionally confirm to admin
+                    await send_notification(NotifyRequest(tg_user_id=message["chat"]["id"], text="✅ Ответ успешно отправлен пользователю!"))
+                except Exception as e:
+                    await send_notification(NotifyRequest(tg_user_id=message["chat"]["id"], text=f"❌ Ошибка отправки ответа: {e}"))
+                return {"ok": True}
+
+    # 2. Handle web_app_data (Fallback if used)
     if "web_app_data" in message:
         data_str = message["web_app_data"].get("data", "{}")
         user = message.get("from", {})
@@ -144,12 +168,13 @@ async def telegram_webhook(req: Request):
             data = json.loads(data_str)
             if data.get("action") == "feedback" and ADMIN_CHAT_ID:
                 text = data.get("text", "")
-                user_info = f"@{user.get('username')}" if user.get("username") else f"{user.get('first_name')} (ID: {user.get('id')})"
+                user_info = f"@{user.get('username')} (ID: {user.get('id')})" if user.get("username") else f"{user.get('first_name')} (ID: {user.get('id')})"
                 msg = f"💡 <b>Новая идея/жалоба!</b>\n\nОт: {user_info}\nТекст: {text}"
                 await send_notification(NotifyRequest(tg_user_id=int(ADMIN_CHAT_ID), text=msg))
         except Exception as e:
             print("Error parsing web_app_data:", e)
             
+    # 3. Handle /start command
     if "text" in message and message["text"].startswith("/start"):
         user_id = message.get("from", {}).get("id")
         user_lang = message.get("from", {}).get("language_code", "en")
@@ -178,6 +203,9 @@ async def telegram_webhook(req: Request):
             )
             
         if user_id:
-            await send_notification(NotifyRequest(tg_user_id=user_id, text=text))
+            try:
+                await send_notification(NotifyRequest(tg_user_id=user_id, text=text))
+            except:
+                pass
 
     return {"ok": True}

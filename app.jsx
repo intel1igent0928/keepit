@@ -952,19 +952,20 @@ function SettingsPage({data,setData}){
   const t=T[data.lang||'ru'];
   const [feedbackText,setFeedbackText]=useState('');
   const sendFeedback=async ()=>{
-    if(!feedbackText.trim())return;
+    const textToSend = feedbackText.trim();
+    if(!textToSend)return;
     haptic('medium');
+    setFeedbackText(''); // Clear immediately to prevent double-tap
     try {
       const uname = tg?.initDataUnsafe?.user?.username || tg?.initDataUnsafe?.user?.first_name || 'Аноним';
       const uid = tg?.initDataUnsafe?.user?.id || 0;
       await fetch('https://keepit-app.vercel.app/api/feedback', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({user_name: uname, user_id: uid, text: feedbackText})
+        body: JSON.stringify({user_name: uname, user_id: uid, text: textToSend})
       });
     } catch(e) {}
     alert(t.lang==='en'?'Thank you for your feedback! We will definitely consider it.':'Спасибо за ваш отзыв! Мы обязательно его рассмотрим.');
-    setFeedbackText('');
   };
   const resetAll=()=>{if(!window.confirm(t.resetConfirm))return;haptic('heavy');localStorage.clear();window.location.reload();};
   return(
