@@ -84,7 +84,7 @@ const T = {
        autoExpenseAccum:'Авто-расход (накоплено)', subscription:'Подписки', fromSavings:'Из накоплений',
        savings:'Накопления', oweMe:'Мне должны', oweTo:'Я должен', extraIncome:'Доп. доход',
        savingsBalance:'Сумма накоплений', autoSavingsMo:'Авто-накопления / мес', paydaySett:'День зарплаты (1-31)',
-       auto:'Авто'
+       auto:'Авто', payBtn:'Оплатить'
      },
   en:{ home:'Home', budget:'Budget', savings:'Savings', events:'Events', settings:'Settings',
        salary:'Salary', payday:'Pay Day', autoExpenses:'Auto Expenses', subscriptions:'Subscriptions',
@@ -141,7 +141,7 @@ const T = {
        autoExpenseAccum:'Auto-expense (accumulated)', subscription:'Subscriptions', fromSavings:'From savings',
        savings:'Savings', oweMe:'Owed to me', oweTo:'I owe', extraIncome:'Extra Income',
        savingsBalance:'Savings Balance', autoSavingsMo:'Auto-savings / month', paydaySett:'Pay Day',
-       auto:'Auto'
+       auto:'Auto', payBtn:'Pay'
   },
   uz:{ home:'Bosh sahifa', budget:'Budjet', savings:'Jamg\'arma', events:'Tadbirlar', settings:'Sozlamalar',
        salary:'Maosh', payday:'Maosh kuni', autoExpenses:'Avto-xarajatlar', subscriptions:'Obunalar',
@@ -198,7 +198,7 @@ const T = {
        autoExpenseAccum:'Avto-xarajat (yig\'ilgan)', subscription:'Obunalar', fromSavings:'Jamg\'armadan',
        savings:'Jamg\'arma', oweMe:'Menga qarz', oweTo:'Men qarzdorman', extraIncome:'Qo\'shimcha daromad',
        savingsBalance:'Jamg\'arma balansi', autoSavingsMo:'Avto-jamg\'arma / oy', paydaySett:'Maosh kuni (1-31)',
-       auto:'Avto'
+       auto:'Avto', payBtn:'To\'lash'
   },
 };
 
@@ -255,6 +255,59 @@ const notifyBigExpense=(name,amount,currency,lang='ru')=>{
   sendBotMsg(`📤 <b>${t.largeExpenseDefault}</b>\n\n<b>${name}</b>: <code>${fmt(amount,currency,lang)}</code>\n\n${lang==='en'?'Recorded in KeepIt.':'Зафиксировано в KeepIt.'}`);
 };
 
+const checkBotNotifications = (d, setD) => {
+  if(!tg?.initDataUnsafe?.user?.id) return;
+  const now = new Date();
+  const today = now.toDateString();
+  if(d.lastNotifiedDate === today) return;
+
+  let messages = [];
+  const lang = d.lang || 'ru';
+  const t = T[lang];
+
+  const upcomingEvents = (d.events||[]).filter(ev => {
+    const ed = new Date(ev.date);
+    const diff = Math.ceil((ed - now)/86400000);
+    return diff >= 0 && diff <= 3;
+  });
+  if(upcomingEvents.length > 0) {
+    const evNames = upcomingEvents.map(e=>`• ${e.name} (${new Date(e.date).toLocaleDateString()})`).join('\n');
+    messages.push((lang==='en'?'🎉 Upcoming events:\n':'🎉 Напоминание о событиях:\n') + evNames);
+  }
+
+  const mKey = `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
+  const day = now.getDate();
+  const upcomingFixes = (d.fixedExpenses||[]).filter(fe => {
+    const isPaid = (fe.paidMonths||[]).includes(mKey);
+    return !isPaid && (fe.day === day || fe.day === day + 1);
+  });
+  if(upcomingFixes.length > 0) {
+    const fixNames = upcomingFixes.map(f=>`• ${f.name} — ${fmtShort(f.amount, d.currency, lang)}`).join('\n');
+    messages.push((lang==='en'?'📱 Subscriptions due soon:\n':'📱 Скоро списание подписок:\n') + fixNames);
+  }
+
+  const dueDebts = (d.debts||[]).filter(debt => debt.type === 'owe' && !debt.paid && debt.dueDate).filter(debt => {
+    const dd = new Date(debt.dueDate);
+    const diff = Math.ceil((dd - now)/86400000);
+    return diff <= 2;
+  });
+  if(dueDebts.length > 0) {
+    const dNames = dueDebts.map(x=>`• ${x.name} — ${fmtShort(x.amount-(x.paidAmount||0), d.currency, lang)}`).join('\n');
+    messages.push((lang==='en'?'💸 Debt reminder:\n':'💸 Напоминание о долгах:\n') + dNames);
+  }
+
+  if(messages.length > 0) {
+    const fullText = (lang==='en'?'🔔 <b>Daily KeepIt Report</b>\n\n':'🔔 <b>Ежедневный отчёт KeepIt</b>\n\n') + messages.join('\n\n');
+    sendBotMsg(fullText);
+  }
+
+  setD(prev => {
+    const next = {...prev, lastNotifiedDate: today};
+    save('data', next);
+    return next;
+  });
+};
+
 function calcBalance(data) {
   const now=todayDate();
   const lang=data.lang||'ru';
@@ -263,7 +316,7 @@ function calcBalance(data) {
   const mKey = `${y}-${String(m).padStart(2,'0')}`;
   const fe=data.fixedExpenses||[], cats=(data.categories||[]).filter(c=>!c.startMonth||c.startMonth<=mKey), be=data.bigExpenses||[];
   const ie=data.incomeEntries||[];
-  const fixedPaid=fe.filter(x=>x.day<=d).reduce((s,x)=>s+x.amount,0);
+  const fixedPaid=fe.filter(x=>(x.paidMonths||[]).includes(mKey)).reduce((s,x)=>s+x.amount,0);
   const fixedMonthly=fe.reduce((s,x)=>s+x.amount,0);
   const wdElapsed=countWorkdays(y,m,1,d);
   const wdTotal=workdaysInMonth(y,m);
@@ -350,9 +403,9 @@ function FormattedInput({value, onChange, placeholder, style, className, lang='r
   return <input type="text" inputMode="decimal" placeholder={placeholder} value={localVal} onChange={handleChange} onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)} style={style} className={className||"glass-input"}/>;
 }
 
-function NumPadSheet({title,currency,onClose,onConfirm,showSavings,showName,lang}){
+function NumPadSheet({title,currency,onClose,onConfirm,showSavings,showName,lang,initialVal='0'}){
   const t=T[lang||'ru'];
-  const [val,setVal]=useState('0');
+  const [val,setVal]=useState(initialVal.toString());
   const [name,setName]=useState('');
   const [fromSav,setFromSav]=useState(false);
   const press=k=>{ haptic('light'); setVal(p=>{ if(k==='⌫') return p.length>1?p.slice(0,-1):'0'; if(k==='.'&&p.includes('.')) return p; if(p==='0'&&k!=='.') return k; return p+k; }); };
@@ -533,23 +586,27 @@ function Dashboard({data,setData}){
   const userName=tg?.initDataUnsafe?.user?.first_name||'';
   const todayStr=now.toDateString();
   const showSalary=data.userType!=='student'&&data.salaryDay>0&&now.getDate()>=data.salaryDay&&data.salaryConfirmedMonth!==monthKey()&&data.salaryLastAsked!==todayStr;
+  const [salaryPrompt, setSalaryPrompt] = useState(false);
   const confirmSalary=()=>{
+    haptic('light');
+    setSalaryPrompt(true);
+  };
+  const executeSalary=(savingsAmount)=>{
     haptic('heavy');notify('success');
     const lastResult = balance;
     setData(d=>{
       const nowIso = new Date().toISOString();
       const id = Date.now();
       let next={...d,salaryConfirmedMonth:monthKey(),salaryLastAsked:null,salaryConfirmedAt:nowIso,lastMonthResult:lastResult};
-      // Auto-deposit the fixed monthly savings amount
-      if(d.monthlySavings>0){
-        next.savingsBalance=(d.savingsBalance||0)+d.monthlySavings;
-        next.savingsHistory=[...(d.savingsHistory||[]),{id,date:nowIso,type:'deposit',amount:d.monthlySavings,note:t.autoSavingsLog}];
-        // Also log this as an expense from main balance in general history
-        next = logActivity(next, {type:'expense', label:t.autoSavingsLog, amount:d.monthlySavings, color:'#c0392b'});
+      if(savingsAmount>0){
+        next.savingsBalance=(d.savingsBalance||0)+savingsAmount;
+        next.savingsHistory=[...(d.savingsHistory||[]),{id,date:nowIso,type:'deposit',amount:savingsAmount,note:t.autoSavingsLog}];
+        next = logActivity(next, {type:'expense', label:t.autoSavingsLog, amount:savingsAmount, color:'#c0392b'});
       }
-      notifySalary(d.salary,d.monthlySavings,d.currency,d.lang);
+      notifySalary(d.salary,savingsAmount,d.currency,d.lang);
       return logActivity(next,{type:'income',label:t.salaryConfirmedLog,amount:d.salary,color:'#2d7d46'});
     });
+    setSalaryPrompt(false);
   };
   const dismissSalaryTomorrow=()=>{
     haptic('light');
@@ -677,13 +734,26 @@ function Dashboard({data,setData}){
       {(data.fixedExpenses||[]).length>0&&(
         <div className="fixed-list fade-up d4">
           <div className="sec-title" style={{padding:0,marginBottom:8}}>📱 {t.subscriptions}</div>
-          {(data.fixedExpenses||[]).map(fe=>(
-            <div className="fixed-tile" key={fe.id}>
+          {(data.fixedExpenses||[]).map(fe=>{
+            const mK = `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
+            const isPaid = (fe.paidMonths||[]).includes(mK);
+            return (
+            <div className="fixed-tile" key={fe.id} style={{opacity:isPaid?0.6:1}}>
               <div className="ft-icon">{fe.icon}</div>
               <div className="ft-info"><div className="ft-name">{fe.name}</div><div className="ft-day">{fe.day}-го числа</div></div>
-              <div className="ft-amount">-{fmtShort(fe.amount)}</div>
+              {isPaid ? (
+                <div className="ft-amount" style={{color:'var(--text3)'}}>✓ {t.paid}</div>
+              ) : (
+                <button className="btn-sm" style={{margin:0,padding:'6px 12px',background:'var(--accent-soft)',color:'var(--accent)',borderColor:'var(--accent)'}} onClick={()=>{
+                  haptic('medium');notify('success');
+                  setData(d=>({...d, 
+                    fixedExpenses:(d.fixedExpenses||[]).map(x=>x.id===fe.id?{...x,paidMonths:[...(x.paidMonths||[]),mK]}:x),
+                    activityLog:[...(d.activityLog||[]), {id:Date.now(), type:'expense', label:`${t.subscription}: ${fe.name}`, amount:fe.amount, color:'#c0392b', date:now.toISOString()}]
+                  }));
+                }}>{t.payBtn}</button>
+              )}
             </div>
-          ))}
+          )})}
         </div>
       )}
       <div className="sec-title fade-up d4" style={{marginTop:4}}>{t.largeExpenses}</div>
@@ -754,6 +824,7 @@ function Dashboard({data,setData}){
 
       {sheet&&<NumPadSheet title={t.largeExpenseDefault} currency={data.currency} onClose={()=>setSheet(null)} onConfirm={addBig} showSavings showName lang={data.lang}/>}
       {incomeSheet&&<NumPadSheet title={t.extraIncomeDefault} currency={data.currency} onClose={()=>setIncomeSheet(false)} onConfirm={addIncome} showName lang={data.lang}/>}
+      {salaryPrompt&&<NumPadSheet title={t.saveAuto} currency={data.currency} onClose={()=>setSalaryPrompt(false)} onConfirm={executeSalary} lang={data.lang} initialVal={data.monthlySavings||0}/>}
       {chip&&<FlyChip text={chip} onDone={()=>setChip(null)}/>}
     </div>
   );
@@ -1439,7 +1510,7 @@ function HistoryPage({data,setData}){
     if(s>0) items.push({id:'cat_'+c.id,icon:c.icon,name:c.name,sub:c.deductType==='upfront'?t.immediatelyMonth:t.autoExpenseAccum,amount:-s,color:'#c0392b',date:new Date(y,m,Math.max(1,vElapsed)).toISOString()});
   });
   // Fixed expenses paid this month
-  (data.fixedExpenses||[]).filter(fe=>fe.day<=vElapsed).forEach(fe=>{
+  (data.fixedExpenses||[]).filter(fe=>(fe.paidMonths||[]).includes(`${y}-${String(m).padStart(2,'0')}`)).forEach(fe=>{
     items.push({id:'fe_'+fe.id,icon:fe.icon,name:fe.name,sub:`${t.subscription} · ${fe.day}-го`,amount:-fe.amount,color:'#c0392b',date:new Date(y,m,fe.day,10,0).toISOString()});
   });
   // Big expenses this month
@@ -1568,6 +1639,7 @@ function HistoryPage({data,setData}){
   );
 }
 
+let notificationsChecked = false;
 function App(){
   const [isReady, setIsReady]=useState(false);
   const [onboarded,setOnboarded]=useState(()=>load('onboarded',false));
@@ -1575,6 +1647,13 @@ function App(){
   const [data,setDataRaw]=useState(()=>({...DEFAULT_DATA,...load('data',{})}));
   const setData=upd=>setDataRaw(prev=>{const next=typeof upd==='function'?upd(prev):{...prev,...upd};save('data',next);return next;});
   
+  useEffect(()=>{
+    if(isReady && onboarded && !notificationsChecked) {
+      notificationsChecked = true;
+      checkBotNotifications(data, setDataRaw);
+    }
+  }, [isReady, onboarded, data]);
+
   useEffect(()=>{
     tg?.ready();tg?.expand();
     if (tg?.CloudStorage) {
