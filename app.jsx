@@ -1381,11 +1381,16 @@ function DebtsPage({data,setData}){
     setData(d=>{
       const debt=(d.debts||[]).find(x=>x.id===id);
       const isInc=debt?.type==='owed';
+      const amountPaid = (debt?.amount||0)-(debt?.paidAmount||0);
       notifyDebtPaid(debt?.name||'',debt?.amount||0,d.currency,d.lang);
-      return logActivity(
-        {...d,debts:(d.debts||[]).map(x=>x.id===id?{...x,paid:true,paidAmount:x.amount,paidAt:new Date().toISOString()}:x)},
-        {type:isInc?'income':'expense',label:`${t.debtClosedLog}${debt?.name||''}`,amount:(debt?.amount||0)-(debt?.paidAmount||0),color:isInc?'#2d7d46':'#c0392b'}
-      );
+      const nextD = {...d,debts:(d.debts||[]).map(x=>x.id===id?{...x,paid:true,paidAmount:x.amount,paidAt:new Date().toISOString()}:x)};
+      const label = `${t.debtClosedLog}${debt?.name||''}`;
+      if (isInc) {
+        nextD.incomeEntries = [...(d.incomeEntries||[]), {id:Date.now(), date:new Date().toISOString(), amount:amountPaid, note:label}];
+      } else {
+        nextD.bigExpenses = [...(d.bigExpenses||[]), {id:Date.now(), date:new Date().toISOString(), name:label, amount:amountPaid, icon:'💸'}];
+      }
+      return logActivity(nextD, {type:isInc?'income':'expense',label,amount:amountPaid,color:isInc?'#2d7d46':'#c0392b'});
     });
   };
   const handlePartial=(amt)=>{
@@ -1409,7 +1414,13 @@ function DebtsPage({data,setData}){
       const isPaid=newPaid>=debt.amount;
       const ndebts=(d.debts||[]).map(x=>x.id===partialId ? {...x, paidAmount:newPaid, paid:isPaid, paidAt:isPaid?new Date().toISOString():x.paidAt} : x);
       const label = isPaid ? `${t.debtClosedLog}${debt.name}` : `${t.partially} ${debt.type==='owe'?t.debtReturnedLog:t.debtReceivedLog}: ${debt.name}`;
-      return logActivity({...d, debts:ndebts},{type:isInc?'income':'expense',label,amount:pay,color:isInc?'#2d7d46':'#c0392b'});
+      const nextD = {...d, debts:ndebts};
+      if (isInc) {
+        nextD.incomeEntries = [...(d.incomeEntries||[]), {id:Date.now(), date:new Date().toISOString(), amount:pay, note:label}];
+      } else {
+        nextD.bigExpenses = [...(d.bigExpenses||[]), {id:Date.now(), date:new Date().toISOString(), name:label, amount:pay, icon:'💸'}];
+      }
+      return logActivity(nextD,{type:isInc?'income':'expense',label,amount:pay,color:isInc?'#2d7d46':'#c0392b'});
     });
     setPartialId(null);
   };
@@ -1594,10 +1605,6 @@ function HistoryPage({data,setData}){
   (data.incomeEntries||[]).filter(ie=>{const id=new Date(ie.date);return id.getMonth()===m&&id.getFullYear()===y;}).forEach(ie=>{
     items.push({id:'ie_'+ie.id,icon:'💵',name:ie.note||t.extraIncomeDefault,sub:t.income,amount:ie.amount,color:'#2d7d46',date:ie.date});
   });
-  // Debts this month
-  (data.debts||[]).filter(d=>{const dd=new Date(d.createdAt);return dd.getMonth()===m&&dd.getFullYear()===y;}).forEach(d=>{
-    items.push({id:'debt_'+d.id,icon:d.type==='owe'?'💸':'🤝',name:d.name,sub:d.type==='owe'?t.iOwe:t.owedToMe,amount:d.type==='owe'?-d.amount:d.amount,color:d.type==='owe'?'#c0392b':'#2d7d46',date:d.createdAt});
-  });
   // Activity log (Actual transactions)
   (data.activityLog||[]).filter(a=>{const ad=new Date(a.date);return ad.getMonth()===m&&ad.getFullYear()===y;}).forEach(a=>{
     // Check if this activity is already represented by other specialized lists
@@ -1606,7 +1613,7 @@ function HistoryPage({data,setData}){
     const isSav = (data.savingsHistory||[]).some(sh => (sh.id === a.id || Math.abs(new Date(sh.date).getTime() - aTime) < 2000) && sh.amount === a.amount);
     const isInc = (data.incomeEntries||[]).some(ie => (ie.id === a.id || Math.abs(new Date(ie.date).getTime() - aTime) < 2000) && ie.amount === a.amount);
     
-    if (!isBig && !isSav && !isInc) {
+    if (!isBig && !isSav && !isInc && a.type !== 'debt') {
       const isPositive = a.type === 'income' || (a.type === 'debt_paid' && (a.label.includes(t.debtReturnedLog) || a.label.includes(t.debtReceivedLog)));
       items.push({
         id: 'act_'+a.id,
