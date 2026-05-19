@@ -202,6 +202,16 @@ const T = {
   },
 };
 
+const getEventDate = (ev, now) => {
+  const d = new Date(ev.date);
+  if (!ev.isAnnual) return d;
+  d.setFullYear(now.getFullYear());
+  if (Math.ceil((d - now)/86400000) < -1) {
+    d.setFullYear(now.getFullYear() + 1);
+  }
+  return d;
+};
+
 const DEFAULT_DATA = {
   salary:4000000, currency:'UZS', salaryDay:25,
   salaryConfirmedMonth:null, salaryLastAsked:null,
@@ -266,13 +276,13 @@ const checkBotNotifications = (d, setD) => {
   const t = T[lang];
   const mKey = `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
 
-  const upcomingEvents = (d.events||[]).filter(ev => {
-    const ed = new Date(ev.date);
+  const upcomingEvents = (d.events||[]).map(e=>({...e, computedDate: getEventDate(e, now)})).filter(ev => {
+    const ed = ev.computedDate;
     const diff = Math.ceil((ed - now)/86400000);
     return diff >= 0 && diff <= 3;
   });
   if(upcomingEvents.length > 0) {
-    const evNames = upcomingEvents.map(e=>`• ${e.name} (${new Date(e.date).toLocaleDateString()})`).join('\n');
+    const evNames = upcomingEvents.map(e=>`• ${e.name} (${e.computedDate.toLocaleDateString()})`).join('\n');
     messages.push((lang==='en'?'🎉 Upcoming events:\n':'🎉 Напоминание о событиях:\n') + evNames + (lang==='en'?'\nDon\'t forget to buy a gift!':'\nНе забудьте что-нибудь купить!'));
   }
 
@@ -624,10 +634,10 @@ function Dashboard({data,setData}){
     }
   });
   
-  const closestEvents = [...(data.events||[])].filter(e=>new Date(e.date)>=new Date(now.toDateString())).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,3);
+  const closestEvents = [...(data.events||[])].map(e=>({...e, computedDate: getEventDate(e, now)})).filter(e=>e.computedDate>=new Date(now.toDateString())).sort((a,b)=>a.computedDate-b.computedDate).slice(0,3);
   const [showEvForm,setShowEvForm]=useState(false);
-  const [evForm,setEvForm]=useState({name:'',date:'',budget:''});
-  const addEv=()=>{if(!evForm.name||!evForm.date)return;haptic('medium');setData(d=>({...d,events:[...(d.events||[]),{id:Date.now(),name:evForm.name,date:evForm.date,budget:parseFloat(evForm.budget)||0}]}));setShowEvForm(false);setEvForm({name:'',date:'',budget:''});};
+  const [evForm,setEvForm]=useState({name:'',date:'',budget:'',isAnnual:false});
+  const addEv=()=>{if(!evForm.name||!evForm.date)return;haptic('medium');setData(d=>({...d,events:[...(d.events||[]),{id:Date.now(),name:evForm.name,date:evForm.date,budget:parseFloat(evForm.budget)||0,isAnnual:evForm.isAnnual}]}));setShowEvForm(false);setEvForm({name:'',date:'',budget:'',isAnnual:false});};
   const progress=Math.max(0,Math.min(100,grossBalance/Math.max(1,totalIncome)*100));
   const h=now.getHours();
   const greeting=data.lang==='en'?(h<12?t.morning:h<17?t.afternoon:t.evening):(h<12?t.morning:h<17?t.afternoon:t.evening);
@@ -842,7 +852,7 @@ function Dashboard({data,setData}){
       <div style={{padding:'0 20px',marginBottom:20}}>
         {closestEvents.length===0&&<div style={{textAlign:'center',color:'var(--text3)',padding:'16px 0',fontSize:13}}>{t.noEvents}</div>}
         {closestEvents.map((ev,i)=>{
-          const d=new Date(ev.date);const dl=Math.ceil((d-now)/86400000);const mon=d.toLocaleString(data.lang==='en'?'en-US':'ru-RU',{month:'short'}).replace('.','');
+          const d=ev.computedDate;const dl=Math.ceil((d-now)/86400000);const mon=d.toLocaleString(data.lang==='en'?'en-US':'ru-RU',{month:'short'}).replace('.','');
           const isW=dl>=0&&dl<=7,isM=dl>7&&dl<=30;
           return(<div className="event-card fade-up" key={ev.id} style={{animationDelay:i*0.05+'s', borderColor:isW?'rgba(217,119,6,.3)':undefined}}>
             <div className="ev-date-box" style={isW?{background:'var(--gold-soft)'}:{}}>
@@ -866,6 +876,10 @@ function Dashboard({data,setData}){
             <input className="glass-input" placeholder={t.eventName} value={evForm.name} onChange={e=>setEvForm(p=>({...p,name:e.target.value}))} style={{marginBottom:10}}/>
             <input className="glass-input" type="date" value={evForm.date} onChange={e=>setEvForm(p=>({...p,date:e.target.value}))} style={{marginBottom:10,colorScheme:'light'}}/>
             <FormattedInput placeholder={t.eventBudget} value={evForm.budget} onChange={v=>setEvForm(p=>({...p,budget:v}))} style={{marginBottom:12}} lang={data.lang}/>
+            <div className="toggle-row" style={{marginBottom:12,borderTop:'none',paddingTop:0}}>
+              <label>{data.lang==='en'?'Repeat annually':'Повторять каждый год'}</label>
+              <label className="toggle"><input type="checkbox" checked={evForm.isAnnual} onChange={e=>setEvForm(p=>({...p,isAnnual:e.target.checked}))}/><span className="toggle-slider"/></label>
+            </div>
             <button className="btn-primary" onClick={addEv}>{t.addEvent.substring(2)}</button>
             <button className="btn-ghost" onClick={()=>setShowEvForm(false)}>{t.cancel}</button>
           </div>
