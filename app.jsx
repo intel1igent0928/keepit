@@ -288,12 +288,44 @@ const checkBotNotifications = (d, setD) => {
 
   const dueDebts = (d.debts||[]).filter(debt => debt.type === 'owe' && !debt.paid && debt.dueDate).filter(debt => {
     const dd = new Date(debt.dueDate);
+  if(!window.Telegram?.WebApp?.initDataUnsafe?.user?.id) return;
+  const now = new Date();
+  const today = now.toDateString();
+  if(d.lastNotifiedDate === today) return;
+
+  let messages = [];
+  const lang = d.lang || 'ru';
+  const t = T[lang];
+  const mKey = `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
+
+  const upcomingEvents = (d.events||[]).filter(ev => {
+    const ed = new Date(ev.date);
+    const diff = Math.ceil((ed - now)/86400000);
+    return diff >= 0 && diff <= 3;
+  });
+  if(upcomingEvents.length > 0) {
+    const evNames = upcomingEvents.map(e=>`• ${e.name} (${new Date(e.date).toLocaleDateString()})`).join('\n');
+    messages.push((lang==='en'?'🎉 Upcoming events:\n':'🎉 Напоминание о событиях:\n') + evNames + (lang==='en'?'\nDon\'t forget to buy a gift!':'\nНе забудьте что-нибудь купить!'));
+  }
+
+  const day = now.getDate();
+  const upcomingFixes = (d.fixedExpenses||[]).filter(fe => {
+    const paidArr = fe.paidMonths || [];
+    return !paidArr.includes(mKey) && !paidArr.includes('skip_'+mKey) && (fe.day === day || fe.day === day + 1);
+  });
+  if(upcomingFixes.length > 0) {
+    const fixNames = upcomingFixes.map(f=>`• ${f.name} — ${fmtShort(f.amount, d.currency, lang)}`).join('\n');
+    messages.push((lang==='en'?'📱 Pay in advance! Subscriptions due soon:\n':'📱 Заплатите заранее! Скоро списание:\n') + fixNames);
+  }
+
+  const dueDebts = (d.debts||[]).filter(debt => debt.type === 'owe' && !debt.paid && debt.dueDate).filter(debt => {
+    const dd = new Date(debt.dueDate);
     const diff = Math.ceil((dd - now)/86400000);
     return diff <= 2;
   });
   if(dueDebts.length > 0) {
     const dNames = dueDebts.map(x=>`• ${x.name} — ${fmtShort(x.amount-(x.paidAmount||0), d.currency, lang)}`).join('\n');
-    messages.push((lang==='en'?'💸 Debt reminder:\n':'💸 Напоминание о долгах:\n') + dNames);
+    messages.push((lang==='en'?'💸 Debt reminder! Don\'t forget to return:\n':'💸 Напоминание! Не забудьте вернуть долг:\n') + dNames);
   }
 
   if(messages.length > 0) {
@@ -575,6 +607,53 @@ function Dashboard({data,setData}){
   const [chip,setChip]=useState(null);
   const {balance,grossBalance,monthlySav,daysLeft,totalPeriod,dailyBudget,catSpent,elapsed,total,catMonthly,fixedMonthly,fixedPaid,extraIncome,totalIncome,baseSalary,wdElapsed,wdTotal,wdLeft,workdayBudget,leftForMonth,remainingCats,remainingFixed}=calcBalance(data);
   const now=todayDate();
+
+  const ActionItems = [];
+  if (data.salaryConfirmedMonth === monthKey() && data.monthlySavings > 0 && data.savingsPaidMonth !== monthKey() && data.savingsSkippedMonth !== monthKey()) {
+    ActionItems.push({
+      id: 'savings',
+      icon: '🏦',
+      title: `${data.lang==='en'?'Transfer':'Перекинуть'} ${fmtShort(data.monthlySavings, data.currency, data.lang)} ${data.lang==='en'?'to savings?':'на копилку?'}`,
+      onYes: () => {
+        haptic('heavy'); notify('success');
+        setData(d => {
+          let next = {...d, savingsPaidMonth: monthKey()};
+          next.savingsBalance = (d.savingsBalance||0) + d.monthlySavings;
+          next.savingsHistory = [...(d.savingsHistory||[]), {id:Date.now(), date:new Date().toISOString(), type:'deposit', amount:d.monthlySavings, note:t.autoSavingsLog}];
+          return logActivity(next, {type:'expense', label:t.autoSavingsLog, amount:d.monthlySavings, color:'#c0392b'});
+        });
+      },
+      onNo: () => {
+        haptic('light');
+        setData(d => ({...d, savingsSkippedMonth: monthKey()}));
+      }
+    });
+  }
+
+  (data.fixedExpenses||[]).forEach(fe => {
+    const paidArr = fe.paidMonths || [];
+    if (fe.day <= now.getDate() + 1 && !paidArr.includes(monthKey()) && !paidArr.includes('skip_'+monthKey())) {
+      ActionItems.push({
+        id: 'fe_' + fe.id,
+        icon: fe.icon,
+        title: `${data.lang==='en'?'Withdraw money for':'Снять деньги на'} ${fe.name} (${fmtShort(fe.amount, data.currency, data.lang)})?`,
+        onYes: () => {
+          haptic('medium'); notify('success');
+          setData(prev => ({
+            ...prev,
+            fixedExpenses: (prev.fixedExpenses||[]).map(x => x.id === fe.id ? {...x, paidMonths: [...(x.paidMonths||[]), monthKey()]} : x)
+          }));
+        },
+        onNo: () => {
+          haptic('light');
+          setData(prev => ({
+            ...prev,
+            fixedExpenses: (prev.fixedExpenses||[]).map(x => x.id === fe.id ? {...x, paidMonths: [...(x.paidMonths||[]), 'skip_' + monthKey()]} : x)
+          }));
+        }
+      });
+    }
+  });
   
   const closestEvents = [...(data.events||[])].filter(e=>new Date(e.date)>=new Date(now.toDateString())).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,3);
   const [showEvForm,setShowEvForm]=useState(false);
@@ -640,7 +719,7 @@ function Dashboard({data,setData}){
     setData(d=>{
       const next={...d,incomeEntries:[...(d.incomeEntries||[]),entry]};
       if(d.userType==='student') next.pocketMoney=(d.pocketMoney||0)+amount;
-      return logActivity(next,{id:entry.id,type:'income',label:entry.note,amount,color:'#2d7d46',date:entry.date});
+      return logActivity(next,{type:'income',label:entry.note,amount,color:'#2d7d46',date:entry.date});
     });
     setChip(`+${fmtShort(amount, data.currency, data.lang)}`);setIncomeSheet(false);setTimeout(()=>setChip(null),700);
   };
@@ -650,6 +729,22 @@ function Dashboard({data,setData}){
         <div style={{fontSize:13,color:'var(--text2)'}}>{greeting}{userName?', '+userName:''} 👋</div>
         <h1>{t.home}</h1>
       </div>
+      {ActionItems.length > 0 && (
+        <div className="action-center fade-up">
+          {ActionItems.map((item, i) => (
+            <div className="action-card" key={item.id} style={{animationDelay:i*0.1+'s'}}>
+              <div className="ac-icon">{item.icon}</div>
+              <div className="ac-content">
+                <div className="ac-title">{item.title}</div>
+                <div className="ac-actions">
+                  <button className="btn-sm" style={{background:'var(--green-soft)',color:'var(--green)',borderColor:'var(--green)',flex:1,padding:'8px'}} onClick={item.onYes}>✓ {data.lang==='en'?'Yes':'Да'}</button>
+                  <button className="btn-sm" style={{background:'var(--coral-soft)',color:'var(--coral)',borderColor:'var(--coral)',flex:1,padding:'8px'}} onClick={item.onNo}>✕ {data.lang==='en'?'No':'Нет'}</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="balance-card fade-up d1">
         <div className="bal-label">{t.available}</div>
         <div className="bal-amount">{fmt(balance,data.currency,data.lang)}</div>
@@ -704,7 +799,6 @@ function Dashboard({data,setData}){
           <span className={`cmp-badge ${cmpPct<=0?'better':'worse'}`}>{cmpPct<=0?'▼':'▲'} {Math.abs(cmpPct)}%</span>
         </div>
       )}
-      {/* Merged auto-expenses */}
       {(data.categories||[]).length>0&&(
         <div className="cat-merged-card fade-up d3">
           <div className="cat-merged-header">
@@ -735,23 +829,14 @@ function Dashboard({data,setData}){
         <div className="fixed-list fade-up d4">
           <div className="sec-title" style={{padding:0,marginBottom:8}}>📱 {t.subscriptions}</div>
           {(data.fixedExpenses||[]).map(fe=>{
-            const mK = `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
+            const mK = monthKey();
             const isPaid = (fe.paidMonths||[]).includes(mK);
+            const isSkipped = (fe.paidMonths||[]).includes('skip_'+mK);
             return (
-            <div className="fixed-tile" key={fe.id} style={{opacity:isPaid?0.6:1}}>
+            <div className="fixed-tile" key={fe.id} style={{opacity:(isPaid||isSkipped)?0.6:1}}>
               <div className="ft-icon">{fe.icon}</div>
               <div className="ft-info"><div className="ft-name">{fe.name}</div><div className="ft-day">{fe.day}-го числа</div></div>
-              {isPaid ? (
-                <div className="ft-amount" style={{color:'var(--text3)'}}>✓ {t.paid}</div>
-              ) : (
-                <button className="btn-sm" style={{margin:0,padding:'6px 12px',background:'var(--accent-soft)',color:'var(--accent)',borderColor:'var(--accent)'}} onClick={()=>{
-                  haptic('medium');notify('success');
-                  setData(d=>({...d, 
-                    fixedExpenses:(d.fixedExpenses||[]).map(x=>x.id===fe.id?{...x,paidMonths:[...(x.paidMonths||[]),mK]}:x),
-                    activityLog:[...(d.activityLog||[]), {id:Date.now(), type:'expense', label:`${t.subscription}: ${fe.name}`, amount:fe.amount, color:'#c0392b', date:now.toISOString()}]
-                  }));
-                }}>{t.payBtn}</button>
-              )}
+              <div className="ft-amount" style={{color:isPaid?'var(--text3)':'var(--coral)'}}>{isPaid ? `✓ ${t.paid}` : isSkipped ? '✕' : `-${fmtShort(fe.amount,data.currency,data.lang)}`}</div>
             </div>
           )})}
         </div>
@@ -771,12 +856,10 @@ function Dashboard({data,setData}){
         ))}
         <button className="add-btn" onClick={()=>{haptic('light');setSheet(true);}}>{t.addBigExpense}</button>
       </div>
-      {/* Extra income button */}
       <div style={{padding:'0 20px',marginBottom:20}}>
         <button className="add-btn" style={{borderColor:'var(--green)',color:'var(--green)',background:'var(--green-soft)'}} onClick={()=>{haptic('light');setIncomeSheet(true);}}>
           {data.userType==='student'?t.studentExtraBtn:t.extraIncomeBtn}
         </button>
-        {/* this month extra income entries */}
         {(data.incomeEntries||[]).filter(e=>{const d=new Date(e.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).map(e=>(
           <div className="sav-history-item" key={e.id} style={{marginBottom:5}}>
             <div className="shi-icon">💵</div>
@@ -1653,6 +1736,7 @@ function App(){
       checkBotNotifications(data, setDataRaw);
     }
   }, [isReady, onboarded, data]);
+
 
   useEffect(()=>{
     tg?.ready();tg?.expand();
