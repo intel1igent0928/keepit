@@ -256,38 +256,6 @@ const notifyBigExpense=(name,amount,currency,lang='ru')=>{
 };
 
 const checkBotNotifications = (d, setD) => {
-  if(!tg?.initDataUnsafe?.user?.id) return;
-  const now = new Date();
-  const today = now.toDateString();
-  if(d.lastNotifiedDate === today) return;
-
-  let messages = [];
-  const lang = d.lang || 'ru';
-  const t = T[lang];
-
-  const upcomingEvents = (d.events||[]).filter(ev => {
-    const ed = new Date(ev.date);
-    const diff = Math.ceil((ed - now)/86400000);
-    return diff >= 0 && diff <= 3;
-  });
-  if(upcomingEvents.length > 0) {
-    const evNames = upcomingEvents.map(e=>`• ${e.name} (${new Date(e.date).toLocaleDateString()})`).join('\n');
-    messages.push((lang==='en'?'🎉 Upcoming events:\n':'🎉 Напоминание о событиях:\n') + evNames);
-  }
-
-  const mKey = `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
-  const day = now.getDate();
-  const upcomingFixes = (d.fixedExpenses||[]).filter(fe => {
-    const isPaid = (fe.paidMonths||[]).includes(mKey);
-    return !isPaid && (fe.day === day || fe.day === day + 1);
-  });
-  if(upcomingFixes.length > 0) {
-    const fixNames = upcomingFixes.map(f=>`• ${f.name} — ${fmtShort(f.amount, d.currency, lang)}`).join('\n');
-    messages.push((lang==='en'?'📱 Subscriptions due soon:\n':'📱 Скоро списание подписок:\n') + fixNames);
-  }
-
-  const dueDebts = (d.debts||[]).filter(debt => debt.type === 'owe' && !debt.paid && debt.dueDate).filter(debt => {
-    const dd = new Date(debt.dueDate);
   if(!window.Telegram?.WebApp?.initDataUnsafe?.user?.id) return;
   const now = new Date();
   const today = now.toDateString();
@@ -340,6 +308,7 @@ const checkBotNotifications = (d, setD) => {
   });
 };
 
+
 function calcBalance(data) {
   const now=todayDate();
   const lang=data.lang||'ru';
@@ -373,7 +342,7 @@ function calcBalance(data) {
   }).reduce((s,x)=>s+x.amount,0);
   const baseSalary=data.userType==='student'?(data.pocketMoney||0):data.salary;
   const totalIncome=baseSalary+extraIncome;
-  const monthlySav=data.monthlySavings||0;
+  const monthlySav=(data.savingsSkippedMonth === mKey) ? 0 : (data.monthlySavings||0);
   const totalSpent=fixedPaid+catSpent+bigSpent;
   // Balance: income - expenses - reserved savings
   const balance=totalIncome-totalSpent-monthlySav;
@@ -1778,7 +1747,7 @@ function App(){
   useEffect(()=>{document.documentElement.setAttribute('data-theme',data.theme||'light');},[data.theme]);
   const handleOnboard=(fields)=>{
     const now = new Date();
-    const mKey = `${now.getFullYear()}-${now.getMonth()}`;
+    const mKey = monthKey();
     const t = T[fields.lang||'ru'];
     let nextData = {...fields, salaryConfirmedMonth: mKey, salaryConfirmedAt: now.toISOString(), activityLog: [], savingsHistory: []};
     
@@ -1801,25 +1770,8 @@ function App(){
       });
     }
 
-    // 2. If user set up auto-savings, perform the first transfer immediately
-    if (fields.monthlySavings > 0) {
-      nextData.savingsBalance = (nextData.savingsBalance || 0) + fields.monthlySavings;
-      nextData.savingsHistory.push({
-        id: Date.now(),
-        date: now.toISOString(),
-        type: 'deposit',
-        amount: fields.monthlySavings,
-        note: t.autoSavingsLog
-      });
-      nextData.activityLog.push({
-        id: Date.now() + 1,
-        date: now.toISOString(),
-        type: 'expense',
-        label: t.autoSavingsLog,
-        amount: fields.monthlySavings,
-        color: '#c0392b'
-      });
-    }
+    // 2. We do NOT perform auto-savings immediately anymore.
+    // Instead, the Action Center card will ask the user on the dashboard.
     
     setData(nextData);
     save('onboarded',true);
