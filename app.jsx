@@ -9,9 +9,9 @@ const save = (k,v) => {
 };
 const load = (k,d) => { try { const r=localStorage.getItem('k2_'+k); return r?JSON.parse(r):d; } catch{return d;} };
 
-const CURRENCIES = ['UZS','KGS','USD','EUR','RUB','KZT'];
+const CURRENCIES = ['USD','UZS','RUB'];
 const ICONS = ['🍔','🚕','💪','🏠','💊','📚','🎮','✈️','👔','🎁','🛒','⚡','🌐','🎵','🎓','🏦'];
-const LANGS = { ru:'Русский', en:'English' };
+const LANGS = { ru:'Русский', en:'English', uz:'O\'zbekcha' };
 const daysInMonth = (y,m) => new Date(y,m+1,0).getDate();
 const todayDate = () => new Date();
 const monthKey = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`; };
@@ -143,6 +143,63 @@ const T = {
        savingsBalance:'Savings Balance', autoSavingsMo:'Auto-savings / month', paydaySett:'Pay Day',
        auto:'Auto'
   },
+  uz:{ home:'Bosh sahifa', budget:'Budjet', savings:'Jamg\'arma', events:'Tadbirlar', settings:'Sozlamalar',
+       salary:'Maosh', payday:'Maosh kuni', autoExpenses:'Avto-xarajatlar', subscriptions:'Obunalar',
+       available:'Mavjud', leftForMonthLabel:'Oy oxirigacha qoldi', spent:'Sarflangan', saved:'Yig\'ilgan', contracts:'Kontraktlar',
+       plannedUntilEnd:'Oy oxirigacha rejalashtirilgan xarajatlar', initialSavings:'Boshlang\'ich balans', allDays:'Barcha kunlar',
+       startFrom:'Boshlash:', now:'Shu oydan', nextSalary:'Keyingi maoshdan', nextMonth:'Keyingi oydan',
+       addCategory:'+ Kategoriya qo\'shish', addSubscription:'+ Obuna qo\'shish',
+       addContract:'+ Kontrakt qo\'shish', addGoal:'+ Maqsad qo\'shish', addEvent:'+ Tadbir qo\'shish',
+       addBigExpense:'+ Katta xarajat qo\'shish', deposit:'To\'ldirish', withdraw:'Ishlatish',
+       cancel:'Bekor qilish', save:'Saqlash', reset:'Ma\'lumotlarni o\'chirish', confirm:'Tasdiqlash',
+       received:'Maosh tushdimi?', today:'Bugun', done:'Tayyor ✓', theme:'Mavzu',
+       language:'Til', currency:'Valyuta', dark:'Qorong\'i', light:'Yorug\'',
+       salaryDay:'Maosh kuni', goalName:'Maqsad nomi', targetAmount:'Maqsadli summa',
+       monthlyDeposit:'Oyiga yig\'ish', fromSavings:'Jamg\'armadan 🏦',
+       bigExpenseTitle:'Xarajat nomi', history:'Tarix', noHistory:'Hozircha amaliyotlar yo\'q',
+       nearestEvents:'Yaqin tadbirlar', noEvents:'Yaqin tadbirlar yo\'q', eventName:'Ism yoki nom', eventBudget:'Sovg\'a budjeti (ixtiyoriy)',
+       debts:'Qarzlar', iOwe:'Men qarzdorman', owedToMe:'Menga qarz', addDebt:'+ Qarz qo\'shish',
+       debtName:'Ism (Alisher, Vanya…)', debtAmount:'Summa', debtNote:'Eslatma (ixtiyoriy)',
+       paidPart:'Qisman', paidAll:'✓ Hammasi', income:'Tushumlar', expenses:'Xarajatlar', all:'Barchasi', downloadCSV:'📥 CSV yuklab olish',
+       yesterday:'Kecha', goals:'Maqsadlar', feedback:'💡 Fikr va Shikoyatlar', feedbackPlaceholder:'Fikr, shikoyat yoki taklifingizni yozing...',
+       feedbackSubmit:'📤 Yuborish', tgNotifications:'🤖 Telegram bildirishnomalar', tgDesc1:'Bot orqali bildirishnomalar',
+       tgDesc2:'Avtomatik sozlangan. Bildirishnomalar qachon keladi:', tgTest:'🔔 Test yuborish',
+       tgDesc3:'• Maosh tushganda\n• Qarz qo\'shilganda\n• Katta xarajat qayd etilganda\n• Obuna eslatmasi',
+       helloTitle:'Salom! Men KeepIt', helloSub:'Aqlli moliyaviy yordamchi. Qanday daromad topasiz?',
+       workerBtn:'💼 Ishlayman — maosh olaman', studentBtn:'🎓 Talabaman / ota-onamdan olaman',
+       yourSalary:'Sizning maoshingiz', yourSalarySub:'Qancha maosh olasiz va qaysi kuni?',
+       salaryDayPlace:'Maosh kuni (masalan, 25)', dailyBudget:'Kunlik budjet', dailyBudgetSub:'Haftasiga 5 kun ishlaysiz. Tushlik va yo\'lga kuniga qancha?',
+       saveAuto:'Avto-jamg\'arma', saveAutoSub:'Maosh tushganda ortgan qismini avtomat jamg\'armaga olib qo\'yaymi?',
+       saveTarget:'Jamg\'arma maqsadi', saveTargetSub:'Agar hozir yig\'ilgan pulingiz bo\'lsa — summani kiriting. (0 ham mumkin)',
+       pocketMoney:'Cho\'ntak puli', pocketMoneySub:'Hozir qo\'lingizda qancha bor va necha kunga mo\'ljallangan?',
+       pocketDays:'Necha kunga? (masalan: 7)', pocketAddLater:'Yana berishganda — ilovada qo\'shasiz ✓',
+       studentDailySub:'Tushlik va yo\'lga kuniga qancha?',
+       continue:'Davom etish →', letsGo:'Kettik! 🚀', skip:'O\'tkazib yuborish', back:'← Orqaga',
+       salaryConfirmed:'✅ Ha, tushdi!', salaryNotYet:'⏰ Hali yo\'q', salaryOfDate:'Maosh',
+       youCanSpend:'Bugun sarflash mumkin', daysLeftOf:'kundan', daysUntilSalary:'kun maoshgacha',
+       vsLastMonth:'O\'tgan oyga nisbatan', largeExpenses:'Katta xarajatlar', noLargeExpenses:'Bu oyda katta xarajatlar yo\'q',
+       extraIncomeBtn:'➕ Qo\'shimcha daromad', studentExtraBtn:'➕ Ota-onam pul berdi / Qo\'shimcha daromad',
+       mo:'oy', extra:'qo\'sh.', daysLeft:'kun qoldi', spentLower:'sarflandi',
+       salaryConfirmedLog:'Maosh tushdi', autoSavingsLog:'Maoshdan avto-jamg\'arma',
+       largeExpenseDefault:'Katta xarajat', extraIncomeDefault:'Qo\'shimcha daromad',
+       perDay:'/ kun', perMonth:'oyiga', workDays:'ish kuni', dailyBudgetHint:'💡 Bunga ovqat va transport birga kiradi',
+       immediately:'Darhol', partMonth:'Bo\'lib-bo\'lib', immediatelyMonth:'Oy uchun darhol', limitMonth:'Oylik limit',
+       billingDay:'Yechib olish kuni (1-31)', total:'Jami:', due:'Gacha', paid:'To\'landi', unpaid:'To\'lanmagan',
+       delete:'O\'chirish', contractTitlePlace:'Universitet kontrakti...', contractTotalPlace:'Umumiy summa',
+       contractInstallments:'To\'lovlar (% + muddat)', addInstallment:'+ To\'lov qo\'shish',
+       savingsHistoryDeposit:'To\'ldirish', savingsHistoryWithdraw:'Xarajat',
+       goalNamePlace:'iPhone 16, Mashina...', optional:'(ixtiyoriy)', saveGoalBtn:'Yig\'ish',
+       howMuchToSave:'Qancha yig\'ish kerak?', inDays:'{n} kundan keyin', ago:'{n} kun oldin',
+       tomorrow:'Ertaga', days:'kun', resetConfirm:'Barcha ma\'lumotlar o\'chirilsinmi?', feedbackSuccess:'Fikringiz uchun rahmat! Biz buni albatta ko\'rib chiqamiz.',
+       loading:'Yuklanmoqda...', morning:'Xayrli tong', afternoon:'Xayrli kun', evening:'Xayrli kech',
+       debtOweLog:'Qarz: ', debtLentLog:'Qarz berildi: ', debtClosedLog:'Qarz yopildi: ',
+       debtReturnedLog:'qaytarildi', debtReceivedLog:'olindi', debtPaidAlready:'To\'langan:', debtReturnedAlready:'Qaytarilgan:',
+       partially:'Qisman', closed:'Yopilgan', historyOp:'Amaliyot', salaryLog:'Maosh',
+       autoExpenseAccum:'Avto-xarajat (yig\'ilgan)', subscription:'Obunalar', fromSavings:'Jamg\'armadan',
+       savings:'Jamg\'arma', oweMe:'Menga qarz', oweTo:'Men qarzdorman', extraIncome:'Qo\'shimcha daromad',
+       savingsBalance:'Jamg\'arma balansi', autoSavingsMo:'Avto-jamg\'arma / oy', paydaySett:'Maosh kuni (1-31)',
+       auto:'Avto'
+  },
 };
 
 const DEFAULT_DATA = {
@@ -263,15 +320,34 @@ const logActivity=(data,entry)=>({...data,activityLog:[...(data.activityLog||[])
 
 function FlyChip({text,onDone}){ return <div className="fly-chip" onAnimationEnd={onDone}>{text}</div>; }
 
-function FormattedInput({value, onChange, placeholder, style, className, lang='ru'}) {
-  const valStr = (value===0||value) ? new Intl.NumberFormat(lang==='en'?'en-US':'ru-RU').format(value) : '';
+function FormattedInput({value, onChange, placeholder, style, className, lang='ru', maxLen=12}) {
+  const [focused, setFocused] = useState(false);
+  const [localVal, setLocalVal] = useState('');
+
+  useEffect(() => {
+    if(!focused) {
+      setLocalVal((value===0||value) ? new Intl.NumberFormat(lang==='en'?'en-US':'ru-RU').format(value) : '');
+    }
+  }, [value, focused, lang]);
+
   const handleChange = (e) => {
-    const raw = e.target.value.replace(/\s/g, '').replace(/,/g, '');
+    let v = e.target.value;
+    if(!/^[\d\s,\.]*$/.test(v)) return;
+    let raw = v.replace(/\s/g, '');
+    if(lang === 'ru') raw = raw.replace(/,/g, '.');
+    else raw = raw.replace(/,/g, '');
+    
+    if (raw.replace(/\./g, '').length > maxLen) return;
+    
+    setLocalVal(v);
     if(raw==='') { onChange(''); return; }
     const num = parseFloat(raw);
-    if(!isNaN(num)) onChange(num);
+    if(!isNaN(num) && !raw.endsWith('.')) {
+      onChange(num);
+    }
   };
-  return <input type="text" inputMode="numeric" placeholder={placeholder} value={valStr} onChange={handleChange} style={style} className={className||"glass-input"}/>;
+
+  return <input type="text" inputMode="decimal" placeholder={placeholder} value={localVal} onChange={handleChange} onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)} style={style} className={className||"glass-input"}/>;
 }
 
 function NumPadSheet({title,currency,onClose,onConfirm,showSavings,showName,lang}){
@@ -315,6 +391,7 @@ function Onboarding({onDone}){
           <select className="glass-input" value={d.lang||'ru'} onChange={e=>{upd('lang',e.target.value);}} style={{flex:1}}>
             <option value="ru" style={{color:'#000'}}>🇷🇺 Русский</option>
             <option value="en" style={{color:'#000'}}>🇬🇧 English</option>
+            <option value="uz" style={{color:'#000'}}>🇺🇿 O'zbekcha</option>
           </select>
           <select className="glass-input" value={d.theme||'light'} onChange={e=>{upd('theme',e.target.value); document.documentElement.setAttribute('data-theme',e.target.value);}} style={{flex:1}}>
             <option value="light" style={{color:'#000'}}>☀️ {t.light}</option>
@@ -484,6 +561,10 @@ function Dashboard({data,setData}){
   const lastSpent=data.lastMonthSpent||0;
   const cmpPct=lastSpent>0?Math.round((thisSpent-lastSpent)/lastSpent*100):null;
   const addBig=(amount,extras)=>{
+    if (!extras.fromSavings && amount > grossBalance) {
+      alert(data.lang==='en'?'Not enough funds!':(data.lang==='uz'?'Mablag\' yetarli emas!':'Недостаточно средств!'));
+      return;
+    }
     const exp={id:Date.now(),name:extras.name||t.largeExpenseDefault,icon:'💸',amount,date:now.toISOString(),fromSavings:extras.fromSavings||false};
     setData(d=>{
       const next={...d,bigExpenses:[...(d.bigExpenses||[]),exp]};
@@ -847,7 +928,13 @@ function SavingsPage({data,setData}){
   const [selIcon,setSelIcon]=useState('🎯');
   const goalIcons=['🎯','📱','🚗','✈️','🏠','💍','👟','🎮','💻','🎓'];
   const deposit=(amount,extras)=>{haptic('medium');notify('success');setData(d=>({...d,savingsBalance:(d.savingsBalance||0)+amount,savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'deposit',amount,note:extras?.name||t.savingsHistoryDeposit}]}));setAddSheet(false);};
-  const withdraw=(amount,extras)=>{haptic('medium');notify('success');setData(d=>({...d,savingsBalance:Math.max(0,(d.savingsBalance||0)-amount),savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'withdraw',amount,note:extras?.name||t.savingsHistoryWithdraw}]}));setWdSheet(false);};
+  const withdraw=(amount,extras)=>{
+    if (amount > (data.savingsBalance||0)) {
+      alert(data.lang==='en'?'Not enough funds in savings!':(data.lang==='uz'?'Jamg\'armada mablag\' yetarli emas!':'Недостаточно средств в копилке!'));
+      return;
+    }
+    haptic('medium');notify('success');setData(d=>({...d,savingsBalance:Math.max(0,(d.savingsBalance||0)-amount),savingsHistory:[...(d.savingsHistory||[]),{id:Date.now(),date:new Date().toISOString(),type:'withdraw',amount,note:extras?.name||t.savingsHistoryWithdraw}]}));setWdSheet(false);
+  };
   const saveGoal=()=>{if(!gForm.name||!gForm.target)return;haptic('medium');setData(d=>({...d,savingsGoals:[...(d.savingsGoals||[]),{id:Date.now(),name:gForm.name,target:parseFloat(gForm.target),monthly:parseFloat(gForm.monthly)||0,saved:0,icon:selIcon}]}));setShowAdd(false);setGForm({name:'',target:'',monthly:''});};
   return(
     <div className="page">
@@ -967,7 +1054,18 @@ function SettingsPage({data,setData}){
     } catch(e) {}
     alert(t.lang==='en'?'Thank you for your feedback! We will definitely consider it.':'Спасибо за ваш отзыв! Мы обязательно его рассмотрим.');
   };
-  const resetAll=()=>{if(!window.confirm(t.resetConfirm))return;haptic('heavy');localStorage.clear();window.location.reload();};
+  const resetAll=()=>{
+    if(!window.confirm(t.resetConfirm))return;
+    haptic('heavy');
+    localStorage.clear();
+    try {
+      if(window.Telegram?.WebApp?.CloudStorage) {
+        window.Telegram.WebApp.CloudStorage.removeItem('k2_data');
+        window.Telegram.WebApp.CloudStorage.removeItem('k2_onboarded');
+      }
+    } catch(e){}
+    window.location.reload();
+  };
   return(
     <div className="page">
       <div className="page-hdr fade-up"><h1>⚙️ {t.settings}</h1></div>
@@ -983,7 +1081,7 @@ function SettingsPage({data,setData}){
       <div className="settings-group fade-up d2">
         {Object.entries(LANGS).map(([code,name])=>(
           <div className="settings-row" key={code} onClick={()=>{haptic('light');setData(d=>({...d,lang:code}));}} style={{cursor:'pointer'}}>
-            <div className="sr-icon">{code==='ru'?'🇷🇺':'🇬🇧'}</div>
+            <div className="sr-icon">{code==='ru'?'🇷🇺':code==='en'?'🇬🇧':'🇺🇿'}</div>
             <div className="sr-label">{name}</div>
             {data.lang===code&&<div style={{color:'var(--blue)',fontWeight:900}}>✓</div>}
           </div>
@@ -994,7 +1092,26 @@ function SettingsPage({data,setData}){
         <div className="settings-row">
           <div className="sr-icon">💱</div>
           <div className="sr-label">{t.currency}</div>
-          <select value={data.currency} onChange={e=>{haptic('light');setData(d=>({...d,currency:e.target.value}));}}>
+          <select value={data.currency} onChange={e=>{
+            const newCurr = e.target.value;
+            if (newCurr === data.currency) return;
+            const msg = data.lang === 'en' 
+              ? 'Warning! Changing the currency will RESET ALL YOUR DATA to avoid incorrect balances. Are you sure?'
+              : (data.lang === 'uz' 
+                 ? 'Diqqat! Noto\'g\'ri balanslarning oldini olish uchun valyutani o\'zgartirish BARCHA MA\'LUMOTLARNI o\'chiradi. Ishonchingiz komilmi?' 
+                 : 'Внимание! Чтобы избежать ошибок в балансе, смена валюты ПОЛНОСТЬЮ СБРОСИТ ВСЕ ВАШИ ДАННЫЕ. Вы уверены?');
+            if(window.confirm(msg)) {
+              haptic('heavy');
+              localStorage.clear();
+              try {
+                if(window.Telegram?.WebApp?.CloudStorage) {
+                  window.Telegram.WebApp.CloudStorage.removeItem('k2_data');
+                  window.Telegram.WebApp.CloudStorage.removeItem('k2_onboarded');
+                }
+              } catch(err){}
+              window.location.reload();
+            }
+          }}>
             {CURRENCIES.map(c=><option key={c} style={{background:'var(--bg)'}}>{c}</option>)}
           </select>
         </div>
@@ -1113,6 +1230,16 @@ function DebtsPage({data,setData}){
     setShowForm(false);setForm({name:'',amount:'',type:'owe',note:'',dueDate:''});
   };
   const markPaid=(id)=>{
+    const debt=(data.debts||[]).find(x=>x.id===id);
+    const rem = (debt?.amount||0)-(debt?.paidAmount||0);
+    const isInc=debt?.type==='owed';
+    if (!isInc) {
+      const gBal = calcBalance(data).grossBalance;
+      if (rem > gBal) {
+        alert(data.lang==='en'?'Not enough funds!':(data.lang==='uz'?'Mablag\' yetarli emas!':'Недостаточно средств!'));
+        return;
+      }
+    }
     haptic('medium');notify('success');
     setData(d=>{
       const debt=(d.debts||[]).find(x=>x.id===id);
@@ -1131,6 +1258,13 @@ function DebtsPage({data,setData}){
     const remaining=debt.amount-(debt.paidAmount||0);
     const pay=Math.min(amt,remaining);
     if(pay<=0) {setPartialId(null); return;}
+    if (debt.type === 'owe') {
+      const gBal = calcBalance(data).grossBalance;
+      if (pay > gBal) {
+        alert(data.lang==='en'?'Not enough funds!':(data.lang==='uz'?'Mablag\' yetarli emas!':'Недостаточно средств!'));
+        return;
+      }
+    }
     haptic('medium');notify('success');
     setData(d=>{
       const isInc=debt.type==='owed';
